@@ -21,7 +21,9 @@ namespace MessengerData
             modelBuilder.Entity<Message>().HasKey(x => new {x.Date, x.Guid});
             modelBuilder.Entity<DeletedMessage>().HasKey(x => x.Guid);
             modelBuilder.Entity<Chat>().HasKey(x => x.Guid);
-            //modelBuilder.Entity<User>()
+
+            modelBuilder.Entity<User>().HasMany(x => x.Chats).WithMany(x => x.Users).UsingEntity<ChatUsers>();
+            modelBuilder.Entity<Message>().HasOne(x => x.User).WithMany(x => x.Messages).HasForeignKey( x => x.UserGuid);
         }
     }
 }
