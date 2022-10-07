@@ -12,8 +12,11 @@ namespace MessengerModel
         public DateTime Date { get; set; }
         public Chat Chat { get; set; } = null!;
         public Guid ChatGuid { get; set; }
-        public User User { get; set; }
+        public User User { get; set; } = null!;
         public Guid UserGuid { get; set; }
-        public string Text { get; set; } = String.Empty;
+        public string Text { get; set; } = string.Empty;
+        public Message CommentedMessage { get; set; } = null!;
+        public Guid CommentedMessageGuid { get; set; }
+
     }
 }

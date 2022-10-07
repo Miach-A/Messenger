@@ -9,6 +9,6 @@ namespace MessengerModel
     public class Chat
     {
         public Guid Guid { get; set; }
-        public string Name { get; set; } = String.Empty;    
+        public string Name { get; set; } = string.Empty;    
     }
 }
