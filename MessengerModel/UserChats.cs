@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace MessengerModel
 {
-    public class ChatUsers
+    public class UserChats
     {
-        public Chat Chat { get; set; } = null!;
-        public Guid ChatGuid { get; set; }
         public User User { get; set; } = null!;
         public Guid UserGuid { get; set; }
-
+        public Chat Chat { get; set; } = null!;
+        public Guid ChatGuid { get; set; }
     }
 }

@@ -10,7 +10,7 @@ namespace MessengerModel
     {
         public Guid Guid { get; set; }
         public string Name { get; set; } = string.Empty;
-        public List<User> Users { get; set; } = null!;
+        public List<UserChats> ChatUsers { get; set; } = null!;
         public List<Message>? Messages { get; set; }
     }
 }
