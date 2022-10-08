@@ -11,14 +11,19 @@ namespace MessengerData
         {
             _configuration = configuration;
         }
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Message> Messages { get; set; } = null!;
+        public DbSet<Chat> Chats { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(_configuration.GetConnectionString("SqlConnectionString"));
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        {     
             modelBuilder.Entity<User>().HasKey(x => x.Guid);
             modelBuilder.Entity<Message>().HasKey(x => new {x.Date, x.Guid});
+            modelBuilder.Entity<Message>().Property(x => x.Date).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Message>().Property(x => x.Guid).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<DeletedMessage>().HasKey(x => new { x.Date, x.MessageGuid, x.ChatGuid, x.UserGuid });
             modelBuilder.Entity<Chat>().HasKey(x => x.Guid);
             modelBuilder.Entity<UserChats>().HasKey(x => new { x.ChatGuid, x.UserGuid });
