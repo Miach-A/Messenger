@@ -9,5 +9,6 @@
         public ICollection<UserChats>? UserChats { get; set; }
         public ICollection<Message>? Messages { get; set; }
         public ICollection<UserContacts>? Contacts { get; set; }
+        public ICollection<DeletedMessage>? DeletedMessages { get; set; }
     }
 }
