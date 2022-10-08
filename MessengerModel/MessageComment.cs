@@ -6,14 +6,13 @@ using System.Threading.Tasks;
 
 namespace MessengerModel
 {
-    public class DeletedMessage
+    public class MessageComment
     {
-        public DateTime Date { get; set; }
+        public DateTime MessageDate { get; set; }
         public Message Message { get; set; } = null!;
         public Guid MessageGuid { get; set; }
-        public Chat Chat { get; set; } = null!;
-        public Guid ChatGuid { get; set; }
-        public User User { get; set; } = null!;
-        public Guid UserGuid { get; set; }
+        public DateTime CommentedMessageDate { get; set; }
+        public Message CommentedMessage { get; set; } = null!;
+        public Guid CommentedMessageGuid { get; set; }
     }
 }

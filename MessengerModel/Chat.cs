@@ -10,7 +10,8 @@ namespace MessengerModel
     {
         public Guid Guid { get; set; }
         public string Name { get; set; } = string.Empty;
-        public List<UserChats> ChatUsers { get; set; } = null!;
-        public List<Message>? Messages { get; set; }
+        public ICollection<UserChats> ChatUsers { get; set; } = null!;
+        public ICollection<Message>? Messages { get; set; }
+        public ICollection<DeletedMessage>? DeletedMessages { get; set; }
     }
 }
