@@ -21,6 +21,7 @@ namespace MessengerData
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {     
             modelBuilder.Entity<User>().HasKey(x => x.Guid);
+            modelBuilder.Entity<User>().Property(x => x.Name).IsUnicode(true).HasMaxLength(36);
             modelBuilder.Entity<Message>().HasKey(x => new {x.Date, x.Guid});
             modelBuilder.Entity<Message>().Property(x => x.Date).ValueGeneratedOnAdd();
             modelBuilder.Entity<Message>().Property(x => x.Guid).HasDefaultValueSql("NEWID()");
