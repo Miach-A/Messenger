@@ -1,10 +1,9 @@
 ﻿using MessengerData.Providers;
-using MessengerModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using MessengerData.Extensions;
-
+using MessengerModel.UserModels;
 
 namespace Messenger.Controllers
 {
@@ -44,10 +43,11 @@ namespace Messenger.Controllers
         }
 
         [HttpPost]
-        public Task<IActionResult> Post()
+        public async Task<IActionResult> Post([FromQuery] NewUserDTO newUserDTO)
         {
             //_provider.
-            return Ok();
+            await Task.CompletedTask;
+            return Ok(newUserDTO);
         }
 
         [HttpPut("{id}")]

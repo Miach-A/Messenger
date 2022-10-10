@@ -1,4 +1,4 @@
-﻿namespace MessengerModel
+﻿namespace MessengerModel.UserModels
 {
     public class User
     {

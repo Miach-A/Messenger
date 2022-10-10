@@ -1,5 +1,5 @@
 ﻿using MessengerData.Repository;
-using MessengerModel;
+using MessengerModel.UserModels;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -24,9 +24,9 @@ namespace MessengerData.Providers
             return _context;
         }
 
-        public User CreateUser()
+        public async Task<User> CreateUserAsync(NewUserDTO newUser)
         {
-
+            return new User();
         }
 
     }

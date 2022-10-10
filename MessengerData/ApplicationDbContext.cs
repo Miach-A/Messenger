@@ -1,4 +1,5 @@
 ﻿using MessengerModel;
+using MessengerModel.UserModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -21,6 +22,7 @@ namespace MessengerData
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {     
             modelBuilder.Entity<User>().HasKey(x => x.Guid);
+            modelBuilder.Entity<User>().HasIndex(x => x.Name).IsUnique(true);
             modelBuilder.Entity<User>().Property(x => x.Name).IsUnicode(true).HasMaxLength(36);
             modelBuilder.Entity<Message>().HasKey(x => new {x.Date, x.Guid});
             modelBuilder.Entity<Message>().Property(x => x.Date).ValueGeneratedOnAdd();
