@@ -15,6 +15,11 @@ namespace MessengerData.Repository
             _dbSet = _context.Set<T>();
         }
 
+        public ApplicationDbContext GetDbContext()
+        {
+            return _context;
+        }
+
         public EntityEntry<T> Add(T entity)
         {
             return _dbSet.Add(entity);
@@ -89,6 +94,8 @@ namespace MessengerData.Repository
         public IQueryable<T> Get(Expression<Func<T, bool>>? filter = null, 
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, 
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null, 
+            int pageIndex = 0,
+            int pageSize = 20,
             bool AsNoTracking = true)
         {
             IQueryable<T> query = _dbSet;
@@ -110,12 +117,11 @@ namespace MessengerData.Repository
 
             if (orderBy != null)
             {
-                return orderBy(query);
+                query =  orderBy(query);
             }
-            else
-            {
-                return query;
-            }
+
+            query = query.Skip(pageIndex * pageSize).Take(pageIndex);
+            return query;
         }
 
         public EntityEntry<T> Remove(T entity)

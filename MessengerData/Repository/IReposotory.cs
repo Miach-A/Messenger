@@ -6,6 +6,7 @@ namespace MessengerData.Repository
 {
     public interface IRepository<T> where T : class
     {
+        public ApplicationDbContext GetDbContext();
         IQueryable<T> Get(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,

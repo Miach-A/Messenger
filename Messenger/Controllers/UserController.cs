@@ -2,6 +2,8 @@
 using MessengerData.Repository;
 using MessengerModel;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Messenger.Controllers
 {
@@ -14,27 +16,33 @@ namespace Messenger.Controllers
         {
             _provider = provider;
         }
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            _provider.Test();
-            return new string[] { "value1", "value2" };
-        }
 
-        [HttpGet("{guid}")]
+        [HttpGet("{guid:guid}")]
         public async Task<IActionResult> Get(Guid guid)
         {
-            await Task.CompletedTask;
+            return Ok(await _provider.GetRepository().Get(x => x.Guid == guid).ToArrayAsync());
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Get(string? name, string? firstname, string? lastname, string? phonenumber,string? orderby, int pageindex = 0, int pagesize = 20)
+        {
+ 
+            Expression<Func<User, bool>> filter = (x) =>      
+                name == null ? true : x.Name.Contains(name)
+                && firstname == null ? true : x.FirstName.Contains(firstname!)
+                && lastname == null ? true : x.LastName.Contains(lastname!)
+                && phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!);
+            
+            return Ok(await _provider.GetRepository().Get(filter).ToArrayAsync());
+        }
+
+        [HttpPost]
+        public Task<IActionResult> Post()
+        {
+
             return Ok();
         }
 
-        // POST api/<UserController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<UserController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {

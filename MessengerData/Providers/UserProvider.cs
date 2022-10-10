@@ -13,6 +13,15 @@ namespace MessengerData.Providers
             _context = context;
             _repository = repository;
         }
+        public IRepository<User> GetRepository()
+        {
+            return _repository;
+        }
+
+        public ApplicationDbContext GetDbContext()
+        {
+            return _context;
+        }
 
         public void Test()
         {
