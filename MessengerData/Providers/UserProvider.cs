@@ -1,5 +1,6 @@
 ﻿using MessengerData.Repository;
 using MessengerModel.UserModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -24,10 +25,47 @@ namespace MessengerData.Providers
             return _context;
         }
 
-        public async Task<User> CreateUserAsync(NewUserDTO newUser)
+        public async Task<SaveUserResult> CreateUserAsync(NewUserDTO newUserDTO)
         {
-            return new User();
+
+            var hasher = new PasswordHasher<User>();
+            var user = new User
+            {
+                Name = newUserDTO.Name,
+                FirstName = newUserDTO.FirstName,
+                LastName = newUserDTO.LastName,
+                PhoneNumber = newUserDTO.PhoneNumber
+            };
+            user.PasswordHash = hasher.HashPassword(user, newUserDTO.Password);
+            var entry = _repository.Add(user);
+
+            try
+            {
+                _repository.Save();
+                return new SaveUserResult
+                {
+                    Result = true,
+                    User = entry.Entity
+                };
+            }
+            catch (Exception ex)
+            {
+                var fff = 1;
+                return new SaveUserResult
+                {
+                    Result = false
+                };
+            }
+            
+
+            //return entry.Entity;
         }
 
+    }
+
+    public class SaveUserResult
+    {
+        public bool Result { get; set; }
+        public User? User { get; set; } 
     }
 }

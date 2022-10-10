@@ -7,8 +7,8 @@ using MessengerModel.UserModels;
 
 namespace Messenger.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
         private UserProvider _provider;
@@ -43,11 +43,21 @@ namespace Messenger.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromQuery] NewUserDTO newUserDTO)
+        public async Task<IActionResult> Post([FromBody] NewUserDTO newUserDTO)
         {
-            //_provider.
-            await Task.CompletedTask;
-            return Ok(newUserDTO);
+            if (ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _provider.CreateUserAsync(newUserDTO);
+            if (result.Result)
+            {
+                return StatusCode(210, result.User);
+            }
+            else
+            {
+                return StatusCode(500);
+            }
         }
 
         [HttpPut("{id}")]
