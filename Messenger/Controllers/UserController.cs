@@ -1,9 +1,10 @@
 ﻿using MessengerData.Providers;
-using MessengerData.Repository;
 using MessengerModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using MessengerData.Extensions;
+
 
 namespace Messenger.Controllers
 {
@@ -32,14 +33,20 @@ namespace Messenger.Controllers
                 && firstname == null ? true : x.FirstName.Contains(firstname!)
                 && lastname == null ? true : x.LastName.Contains(lastname!)
                 && phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!);
-            
-            return Ok(await _provider.GetRepository().Get(filter).ToArrayAsync());
+
+
+            Func<IQueryable<User>, IOrderedQueryable<User>>? order = 
+                orderby == null 
+                ? null 
+                : (x) => x.OrderBy(orderby);
+
+            return Ok(await _provider.GetRepository().Get(filter, order).ToArrayAsync());
         }
 
         [HttpPost]
         public Task<IActionResult> Post()
         {
-
+            //_provider.
             return Ok();
         }
 

@@ -11,6 +11,8 @@ namespace MessengerData.Repository
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+            int pageIndex = 0,
+            int pageSize = 20,
             bool AsNoTracking = true
             );
 
