@@ -52,7 +52,7 @@ namespace Messenger.Controllers
             var result = await _provider.CreateUserAsync(newUserDTO);
             if (result.Result)
             {
-                return StatusCode(210, result.User);
+                return StatusCode(210, result.Entity);
             }
             else
             {

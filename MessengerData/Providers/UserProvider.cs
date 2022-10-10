@@ -1,6 +1,7 @@
 ﻿using MessengerData.Repository;
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -25,7 +26,7 @@ namespace MessengerData.Providers
             return _context;
         }
 
-        public async Task<SaveUserResult> CreateUserAsync(NewUserDTO newUserDTO)
+        public async Task<SaveResult<User>> CreateUserAsync(NewUserDTO newUserDTO)
         {
 
             var hasher = new PasswordHasher<User>();
@@ -42,30 +43,30 @@ namespace MessengerData.Providers
             try
             {
                 await _repository.SaveAsync();
-                return new SaveUserResult
+                return new SaveResult<User>
                 {
                     Result = true,
-                    User = entry.Entity
+                    Entity = entry.Entity
                 };
             }
-            catch (Exception ex)
+            catch (DbUpdateException exeption)
             {
-                var fff = 1;
-                return new SaveUserResult
+                var result = new SaveResult<User>() { Result = false };
+                if (exeption.InnerException is SqlException)
                 {
-                    Result = false
-                };
+                    if (((SqlException)exeption.InnerException).Number == 2601){
+                        result.ErrorMessage.Add("Duplicate name");
+                    }
+                }
+                return result;
+            }
+            catch
+            {
+                return new SaveResult<User>() { Result = false };
             }
             
-
-            //return entry.Entity;
         }
 
     }
 
-    public class SaveUserResult
-    {
-        public bool Result { get; set; }
-        public User? User { get; set; } 
-    }
 }
