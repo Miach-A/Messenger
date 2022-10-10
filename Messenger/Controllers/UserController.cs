@@ -45,7 +45,7 @@ namespace Messenger.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] NewUserDTO newUserDTO)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }

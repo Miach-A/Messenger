@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MessengerData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20221008115107_MessageGuidValueGenerated")]
-    partial class MessageGuidValueGenerated
+    [Migration("20221010144334_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,9 +34,12 @@ namespace MessengerData.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Public")
+                        .HasColumnType("bit");
+
                     b.HasKey("Guid");
 
-                    b.ToTable("Chat");
+                    b.ToTable("Chats");
                 });
 
             modelBuilder.Entity("MessengerModel.DeletedMessage", b =>
@@ -89,7 +92,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("UserGuid");
 
-                    b.ToTable("Message");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("MessengerModel.MessageComment", b =>
@@ -114,29 +117,6 @@ namespace MessengerData.Migrations
                         .IsUnique();
 
                     b.ToTable("MessageComment");
-                });
-
-            modelBuilder.Entity("MessengerModel.User", b =>
-                {
-                    b.Property<Guid>("Guid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Guid");
-
-                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("MessengerModel.UserChats", b =>
@@ -173,6 +153,42 @@ namespace MessengerData.Migrations
                     b.ToTable("UserContacts");
                 });
 
+            modelBuilder.Entity("MessengerModel.UserModels.User", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Guid");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("MessengerModel.DeletedMessage", b =>
                 {
                     b.HasOne("MessengerModel.Chat", "Chat")
@@ -181,7 +197,7 @@ namespace MessengerData.Migrations
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.HasOne("MessengerModel.User", "User")
+                    b.HasOne("MessengerModel.UserModels.User", "User")
                         .WithMany("DeletedMessages")
                         .HasForeignKey("UserGuid")
                         .OnDelete(DeleteBehavior.ClientCascade)
@@ -208,7 +224,7 @@ namespace MessengerData.Migrations
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.HasOne("MessengerModel.User", "User")
+                    b.HasOne("MessengerModel.UserModels.User", "User")
                         .WithMany("Messages")
                         .HasForeignKey("UserGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -246,7 +262,7 @@ namespace MessengerData.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MessengerModel.User", "User")
+                    b.HasOne("MessengerModel.UserModels.User", "User")
                         .WithMany("UserChats")
                         .HasForeignKey("UserGuid")
                         .OnDelete(DeleteBehavior.ClientCascade)
@@ -259,13 +275,13 @@ namespace MessengerData.Migrations
 
             modelBuilder.Entity("MessengerModel.UserContacts", b =>
                 {
-                    b.HasOne("MessengerModel.User", "Contact")
+                    b.HasOne("MessengerModel.UserModels.User", "Contact")
                         .WithMany("Contacts")
                         .HasForeignKey("ContactGuid")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.HasOne("MessengerModel.User", "User")
+                    b.HasOne("MessengerModel.UserModels.User", "User")
                         .WithMany()
                         .HasForeignKey("UserGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -290,7 +306,7 @@ namespace MessengerData.Migrations
                     b.Navigation("MessageComment");
                 });
 
-            modelBuilder.Entity("MessengerModel.User", b =>
+            modelBuilder.Entity("MessengerModel.UserModels.User", b =>
                 {
                     b.Navigation("Contacts");
 

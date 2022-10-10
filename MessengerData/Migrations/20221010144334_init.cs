@@ -10,53 +10,56 @@ namespace MessengerData.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Chat",
-                columns: table => new
-                {
-                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Chat", x => x.Guid);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "User",
+                name: "Chats",
                 columns: table => new
                 {
                     Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Public = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Chats", x => x.Guid);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.Guid);
+                    table.PrimaryKey("PK_Users", x => x.Guid);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Message",
+                name: "Messages",
                 columns: table => new
                 {
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     ChatGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Message", x => new { x.Date, x.Guid });
+                    table.PrimaryKey("PK_Messages", x => new { x.Date, x.Guid });
                     table.ForeignKey(
-                        name: "FK_Message_Chat_ChatGuid",
+                        name: "FK_Messages_Chats_ChatGuid",
                         column: x => x.ChatGuid,
-                        principalTable: "Chat",
+                        principalTable: "Chats",
                         principalColumn: "Guid");
                     table.ForeignKey(
-                        name: "FK_Message_User_UserGuid",
+                        name: "FK_Messages_Users_UserGuid",
                         column: x => x.UserGuid,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Guid",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -72,15 +75,15 @@ namespace MessengerData.Migrations
                 {
                     table.PrimaryKey("PK_UserChats", x => new { x.ChatGuid, x.UserGuid });
                     table.ForeignKey(
-                        name: "FK_UserChats_Chat_ChatGuid",
+                        name: "FK_UserChats_Chats_ChatGuid",
                         column: x => x.ChatGuid,
-                        principalTable: "Chat",
+                        principalTable: "Chats",
                         principalColumn: "Guid",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserChats_User_UserGuid",
+                        name: "FK_UserChats_Users_UserGuid",
                         column: x => x.UserGuid,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Guid");
                 });
 
@@ -96,14 +99,14 @@ namespace MessengerData.Migrations
                 {
                     table.PrimaryKey("PK_UserContacts", x => new { x.UserGuid, x.ContactGuid });
                     table.ForeignKey(
-                        name: "FK_UserContacts_User_ContactGuid",
+                        name: "FK_UserContacts_Users_ContactGuid",
                         column: x => x.ContactGuid,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Guid");
                     table.ForeignKey(
-                        name: "FK_UserContacts_User_UserGuid",
+                        name: "FK_UserContacts_Users_UserGuid",
                         column: x => x.UserGuid,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Guid",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -121,20 +124,20 @@ namespace MessengerData.Migrations
                 {
                     table.PrimaryKey("PK_DeletedMessage", x => new { x.Date, x.MessageGuid, x.ChatGuid, x.UserGuid });
                     table.ForeignKey(
-                        name: "FK_DeletedMessage_Chat_ChatGuid",
+                        name: "FK_DeletedMessage_Chats_ChatGuid",
                         column: x => x.ChatGuid,
-                        principalTable: "Chat",
+                        principalTable: "Chats",
                         principalColumn: "Guid");
                     table.ForeignKey(
-                        name: "FK_DeletedMessage_Message_Date_MessageGuid",
+                        name: "FK_DeletedMessage_Messages_Date_MessageGuid",
                         columns: x => new { x.Date, x.MessageGuid },
-                        principalTable: "Message",
+                        principalTable: "Messages",
                         principalColumns: new[] { "Date", "Guid" },
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DeletedMessage_User_UserGuid",
+                        name: "FK_DeletedMessage_Users_UserGuid",
                         column: x => x.UserGuid,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Guid");
                 });
 
@@ -151,14 +154,14 @@ namespace MessengerData.Migrations
                 {
                     table.PrimaryKey("PK_MessageComment", x => new { x.MessageDate, x.MessageGuid, x.CommentedMessageDate, x.CommentedMessageGuid });
                     table.ForeignKey(
-                        name: "FK_MessageComment_Message_CommentedMessageDate_CommentedMessageGuid",
+                        name: "FK_MessageComment_Messages_CommentedMessageDate_CommentedMessageGuid",
                         columns: x => new { x.CommentedMessageDate, x.CommentedMessageGuid },
-                        principalTable: "Message",
+                        principalTable: "Messages",
                         principalColumns: new[] { "Date", "Guid" });
                     table.ForeignKey(
-                        name: "FK_MessageComment_Message_MessageDate_MessageGuid",
+                        name: "FK_MessageComment_Messages_MessageDate_MessageGuid",
                         columns: x => new { x.MessageDate, x.MessageGuid },
-                        principalTable: "Message",
+                        principalTable: "Messages",
                         principalColumns: new[] { "Date", "Guid" },
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -174,16 +177,6 @@ namespace MessengerData.Migrations
                 column: "UserGuid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Message_ChatGuid",
-                table: "Message",
-                column: "ChatGuid");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Message_UserGuid",
-                table: "Message",
-                column: "UserGuid");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MessageComment_CommentedMessageDate_CommentedMessageGuid",
                 table: "MessageComment",
                 columns: new[] { "CommentedMessageDate", "CommentedMessageGuid" });
@@ -195,6 +188,16 @@ namespace MessengerData.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Messages_ChatGuid",
+                table: "Messages",
+                column: "ChatGuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_UserGuid",
+                table: "Messages",
+                column: "UserGuid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserChats_UserGuid",
                 table: "UserChats",
                 column: "UserGuid");
@@ -203,6 +206,12 @@ namespace MessengerData.Migrations
                 name: "IX_UserContacts_ContactGuid",
                 table: "UserContacts",
                 column: "ContactGuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Name",
+                table: "Users",
+                column: "Name",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -220,13 +229,13 @@ namespace MessengerData.Migrations
                 name: "UserContacts");
 
             migrationBuilder.DropTable(
-                name: "Message");
+                name: "Messages");
 
             migrationBuilder.DropTable(
-                name: "Chat");
+                name: "Chats");
 
             migrationBuilder.DropTable(
-                name: "User");
+                name: "Users");
         }
     }
 }

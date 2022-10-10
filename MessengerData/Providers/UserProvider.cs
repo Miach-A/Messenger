@@ -37,11 +37,11 @@ namespace MessengerData.Providers
                 PhoneNumber = newUserDTO.PhoneNumber
             };
             user.PasswordHash = hasher.HashPassword(user, newUserDTO.Password);
-            var entry = _repository.Add(user);
+            var entry = await _repository.AddAsync(user);
 
             try
             {
-                _repository.Save();
+                await _repository.SaveAsync();
                 return new SaveUserResult
                 {
                     Result = true,
