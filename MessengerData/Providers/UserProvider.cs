@@ -1,4 +1,5 @@
-﻿using MessengerModel;
+﻿using MessengerData.Repository;
+using MessengerModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace MessengerData.Providers
@@ -6,9 +7,16 @@ namespace MessengerData.Providers
     public class UserProvider
     {
         private readonly ApplicationDbContext _context;
-        public UserProvider(ApplicationDbContext context)
+        private IRepository<User> _repository;
+        public UserProvider(ApplicationDbContext context, IRepository<User> repository)
         {
             _context = context;
+            _repository = repository;
+        }
+
+        public void Test()
+        {
+            var tt = 1;
         }
 
         public async Task<IEnumerable<User>> GetUserByGuid(Guid guid, bool AsNoTraking)

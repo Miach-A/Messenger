@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MessengerData.Providers;
+using MessengerData.Repository;
+using MessengerModel;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.Controllers
 {
@@ -6,17 +9,23 @@ namespace Messenger.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        private UserProvider _provider;
+        public UserController(UserProvider provider)
+        {
+            _provider = provider;
+        }
         [HttpGet]
         public IEnumerable<string> Get()
         {
+            _provider.Test();
             return new string[] { "value1", "value2" };
         }
 
         [HttpGet("{guid}")]
-        public async IActionResult Get(Guid guid)
+        public async Task<IActionResult> Get(Guid guid)
         {
-            
-            return "value";
+            await Task.CompletedTask;
+            return Ok();
         }
 
         // POST api/<UserController>
