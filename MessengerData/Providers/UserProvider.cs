@@ -1,4 +1,5 @@
 ﻿using MessengerModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace MessengerData.Providers
 {
@@ -10,9 +11,17 @@ namespace MessengerData.Providers
             _context = context;
         }
 
-        public async Task<IEnumerable<User>> GetUserByGuid(Guid guid)
+        public async Task<IEnumerable<User>> GetUserByGuid(Guid guid, bool AsNoTraking)
         {
-            var res = await _context.Users.Where(x => x.Guid == guid).Select(x => x).ToArrayAsync();
+            var query = _context.Users.AsQueryable();
+            
+            if (AsNoTraking)
+            {
+                query.AsNoTracking();
+            }
+
+            return await query.Where(x => x.Guid == guid).Select(x => x).ToArrayAsync();
+   
         }
     }
 }
