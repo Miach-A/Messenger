@@ -26,7 +26,7 @@ namespace MessengerData.Providers
             return _context;
         }
 
-        public async Task<SaveResult<User>> CreateUserAsync(NewUserDTO newUserDTO)
+        public async Task<CreateResult<User>> CreateUserAsync(NewUserDTO newUserDTO)
         {
 
             var hasher = new PasswordHasher<User>();
@@ -42,27 +42,16 @@ namespace MessengerData.Providers
 
             try
             {
-                await _repository.SaveAsync();
-                return new SaveResult<User>
-                {
-                    Result = true,
-                    Entity = entry.Entity
+                var saveResult = await _repository.SaveAsync();
+                return new CreateResult<User>{
+                    Result = saveResult.Result,
+                    Entity = entry.Entity,
+                    ErrorMessage = saveResult.ErrorMessage
                 };
-            }
-            catch (DbUpdateException exeption)
-            {
-                var result = new SaveResult<User>() { Result = false };
-                if (exeption.InnerException is SqlException)
-                {
-                    if (((SqlException)exeption.InnerException).Number == 2601){
-                        result.ErrorMessage.Add("Duplicate name");
-                    }
-                }
-                return result;
             }
             catch
             {
-                return new SaveResult<User>() { Result = false };
+                return new CreateResult<User>() { Result = false };
             }
             
         }

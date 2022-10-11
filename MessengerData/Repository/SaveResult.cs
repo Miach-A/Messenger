@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace MessengerData.Repository
 {
-    public class SaveResult<T> where T : class
+    public class SaveResult
     {
         public bool Result { get; set; }
-        public T? Entity { get; set; }
         public List<string> ErrorMessage { get; set; } = new List<string>();
     }
 }

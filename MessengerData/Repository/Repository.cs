@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 using MessengerData.Extensions;
+using Microsoft.Data.SqlClient;
 
 namespace MessengerData.Repository
 {
@@ -144,14 +145,54 @@ namespace MessengerData.Repository
             _dbSet.UpdateRange(entity);
         }
 
-        public void Save()
+        public SaveResult Save()
         {
-            _context.SaveChanges();
+            try
+            {
+                _context.SaveChanges();
+                return new SaveResult{ Result = true };
+            }
+            catch(SqlException exeption)
+            {
+                var result = new SaveResult() { Result = false };
+
+                if (exeption.Number == 2601)
+                {
+                    result.ErrorMessage.Add("Duplicate field");
+                }
+
+                return result;
+            }
+            catch
+            {
+                return new SaveResult() { Result = false };
+            }
+
         }
 
-        public async Task SaveAsync()
+        public async Task<SaveResult> SaveAsync()
         {
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+                return new SaveResult { Result = true };
+            }
+            catch(SqlException exeption)
+            {
+                var result = new SaveResult() { Result = false };
+
+                if (exeption.Number == 2601)
+                {
+                    result.ErrorMessage.Add("Duplicate field");
+                }
+
+                return result;
+            }
+            catch
+            {
+                return new SaveResult() { Result = false };
+            }
+
         }
 
     }

@@ -35,7 +35,7 @@ namespace MessengerData.Repository
         public void RemoveRange(IEnumerable<T> entity);
         public EntityEntry<T> Update(T entity);
         public void UpdateRange(T entity);
-        public void Save();
-        public Task SaveAsync();
+        public SaveResult Save();
+        public Task<SaveResult> SaveAsync();
     }
 }
