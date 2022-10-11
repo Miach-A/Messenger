@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using MessengerData.Extensions;
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Messenger.Controllers
 {
@@ -19,11 +21,16 @@ namespace Messenger.Controllers
         }
 
         [Authorize]
-        [HttpGet("{guid:guid}")]
-        public async Task<IActionResult> Get(Guid guid)
+        [HttpGet]
+        public async Task<IActionResult> Get()
         {
-            var rr = User.Identity;
-            return Ok(await _provider.GetRepository().Get(x => x.Guid == guid).ToArrayAsync());
+            var guidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (guidString == null)
+            {
+                return Unauthorized();
+            }
+            Guid guid = new Guid(guidString);
+            return Ok(await _provider.GetRepository().Get(x => x.Guid == guid,null, x => x.Include(y => y.UserChats).Include(y => y.Contacts)).ToArrayAsync());
         }
 
         [Authorize]
@@ -31,6 +38,8 @@ namespace Messenger.Controllers
         public async Task<IActionResult> Get(string? name, string? firstname, string? lastname, string? phonenumber,string? orderby, int pageindex = 0, int pagesize = 20)
         {
             var rr = User.Identity;
+            var tt = new Claim(JwtRegisteredClaimNames.Sub, "dfdf");
+            var guidString = User.FindFirst(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
             Expression<Func<User, bool>> filter = (x) =>      
                 name == null ? true : x.Name.Contains(name)
                 && firstname == null ? true : x.FirstName.Contains(firstname!)
@@ -72,7 +81,7 @@ namespace Messenger.Controllers
             {
                 return BadRequest();
             }
-            var result = await _provider.CreateUserAsync(newUserDTO);
+            var result = await _provider.UpdateUser(newUserDTO);
             if (result.Result)
             {
                 return Ok();

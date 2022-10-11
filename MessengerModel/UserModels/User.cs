@@ -8,10 +8,10 @@
         public string LastName { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
-        public ICollection<UserChats>? UserChats { get; set; }
-        public ICollection<Message>? Messages { get; set; }
-        public ICollection<UserContacts>? Contacts { get; set; }
-        public ICollection<DeletedMessage>? DeletedMessages { get; set; }
+        public ICollection<UserChats> UserChats { get; set; } = new List<UserChats>();
+        public ICollection<Message> Messages { get; set; } = new List<Message>();
+        public ICollection<UserContacts> Contacts { get; set; } = new List<UserContacts>();
+        public ICollection<DeletedMessage> DeletedMessages { get; set; } = new List<DeletedMessage>();
         public void UpdateUser(NewUserDTO newUserDTO)
         {
             Name = newUserDTO.Name;

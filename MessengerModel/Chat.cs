@@ -11,8 +11,8 @@ namespace MessengerModel
         public Guid Guid { get; set; }
         public string Name { get; set; } = string.Empty;
         public bool Public { get; set; } = false;
-        public ICollection<UserChats> ChatUsers { get; set; } = null!;
-        public ICollection<Message>? Messages { get; set; }
-        public ICollection<DeletedMessage>? DeletedMessages { get; set; }
+        public ICollection<UserChats> ChatUsers { get; set; } = new List<UserChats>();
+        public ICollection<Message> Messages { get; set; } = new List<Message>();
+        public ICollection<DeletedMessage> DeletedMessages { get; set; } = new List<DeletedMessage>();
     }
 }

@@ -16,6 +16,6 @@ namespace MessengerModel
         public User User { get; set; } = null!;
         public Guid UserGuid { get; set; }
         public string Text { get; set; } = string.Empty;
-        public ICollection<MessageComment>? MessageComment { get; set; }
+        public ICollection<MessageComment> MessageComment { get; set; } = new List<MessageComment>();
     }
 }
