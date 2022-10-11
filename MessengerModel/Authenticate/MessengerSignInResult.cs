@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MessengerModel.Authenticate
 {
-    public class AuthenticateResult
+    public class MessengerSignInResult
     {
         public bool Result { get; set; }
         public string Token { get; set; } = string.Empty;

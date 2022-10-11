@@ -19,7 +19,7 @@ namespace Messenger.Controllers
         public IActionResult Authenticate([FromBody] AuthenticateDTO authenticateDTO)
         {
 
-            var result = _authenticateProvider.Authenticate(authenticateDTO);
+            var result = _authenticateProvider.SignIn(authenticateDTO);
             if (!result.Result)
             {
                 return Unauthorized();
