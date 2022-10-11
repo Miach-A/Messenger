@@ -18,9 +18,11 @@ namespace Messenger.Controllers
             _provider = provider;
         }
 
+        [Authorize]
         [HttpGet("{guid:guid}")]
         public async Task<IActionResult> Get(Guid guid)
         {
+            var rr = User.Identity;
             return Ok(await _provider.GetRepository().Get(x => x.Guid == guid).ToArrayAsync());
         }
 
