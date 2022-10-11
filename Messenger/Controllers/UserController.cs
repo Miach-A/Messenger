@@ -26,10 +26,11 @@ namespace Messenger.Controllers
             return Ok(await _provider.GetRepository().Get(x => x.Guid == guid).ToArrayAsync());
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get(string? name, string? firstname, string? lastname, string? phonenumber,string? orderby, int pageindex = 0, int pagesize = 20)
         {
- 
+            var rr = User.Identity;
             Expression<Func<User, bool>> filter = (x) =>      
                 name == null ? true : x.Name.Contains(name)
                 && firstname == null ? true : x.FirstName.Contains(firstname!)
@@ -44,6 +45,8 @@ namespace Messenger.Controllers
 
             return Ok(await _provider.GetRepository().Get(filter, order).ToArrayAsync());
         }
+
+        [HttpPost]
         public async Task<IActionResult> Post([FromBody] NewUserDTO newUserDTO)
         {
             if (!ModelState.IsValid)
@@ -61,6 +64,7 @@ namespace Messenger.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("{guid}")]
         public async Task<IActionResult> Put(Guid guid, [FromBody] NewUserDTO newUserDTO)
         {

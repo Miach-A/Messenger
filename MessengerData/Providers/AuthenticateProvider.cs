@@ -60,6 +60,7 @@ namespace MessengerData.Providers
                 _configuration["Issuer"], _configuration["Audience"], claims, DateTime.Now, DateTime.Now.AddHours(1), signingCredentials);
 
             result.Token = new JwtSecurityTokenHandler().WriteToken(token);
+            result.Result = true;
 
             return result;
         }
