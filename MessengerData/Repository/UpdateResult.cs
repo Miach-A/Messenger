@@ -1,6 +1,6 @@
 ﻿namespace MessengerData.Repository
 {
-    public class CreateResult<T> where T : class
+    public class UpdateResult<T> where T : class
     {
         public bool Result { get; set; }
         public T? Entity { get; set; }

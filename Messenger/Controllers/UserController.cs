@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using MessengerData.Extensions;
 using MessengerModel.UserModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Messenger.Controllers
 {
@@ -41,8 +42,6 @@ namespace Messenger.Controllers
 
             return Ok(await _provider.GetRepository().Get(filter, order).ToArrayAsync());
         }
-
-        [HttpPost]
         public async Task<IActionResult> Post([FromBody] NewUserDTO newUserDTO)
         {
             if (!ModelState.IsValid)
@@ -52,7 +51,7 @@ namespace Messenger.Controllers
             var result = await _provider.CreateUserAsync(newUserDTO);
             if (result.Result)
             {
-                return StatusCode(210, result.Entity);
+                return StatusCode(201);
             }
             else
             {
@@ -60,15 +59,24 @@ namespace Messenger.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("{guid}")]
+        public async Task<IActionResult> Put(Guid guid, [FromBody] NewUserDTO newUserDTO)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _provider.CreateUserAsync(newUserDTO);
+            if (result.Result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return StatusCode(500, result.ErrorMessage);
+            }
+
         }
 
-        // DELETE api/<UserController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }

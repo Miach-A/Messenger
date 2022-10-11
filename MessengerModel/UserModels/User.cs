@@ -12,5 +12,12 @@
         public ICollection<Message>? Messages { get; set; }
         public ICollection<UserContacts>? Contacts { get; set; }
         public ICollection<DeletedMessage>? DeletedMessages { get; set; }
+        public void UpdateUser(NewUserDTO newUserDTO)
+        {
+            Name = newUserDTO.Name;
+            FirstName = newUserDTO.FirstName;
+            LastName = newUserDTO.LastName;
+            PhoneNumber = newUserDTO.PhoneNumber;
+        }
     }
 }

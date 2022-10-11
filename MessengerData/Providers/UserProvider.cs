@@ -1,8 +1,6 @@
 ﻿using MessengerData.Repository;
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace MessengerData.Providers
@@ -26,24 +24,18 @@ namespace MessengerData.Providers
             return _context;
         }
 
-        public async Task<CreateResult<User>> CreateUserAsync(NewUserDTO newUserDTO)
+        public async Task<UpdateResult<User>> CreateUserAsync(NewUserDTO newUserDTO)
         {
-
             var hasher = new PasswordHasher<User>();
-            var user = new User
-            {
-                Name = newUserDTO.Name,
-                FirstName = newUserDTO.FirstName,
-                LastName = newUserDTO.LastName,
-                PhoneNumber = newUserDTO.PhoneNumber
-            };
+            var user = new User();
+            user.UpdateUser(newUserDTO);
             user.PasswordHash = hasher.HashPassword(user, newUserDTO.Password);
             var entry = await _repository.AddAsync(user);
 
             try
             {
                 var saveResult = await _repository.SaveAsync();
-                return new CreateResult<User>{
+                return new UpdateResult<User>{
                     Result = saveResult.Result,
                     Entity = entry.Entity,
                     ErrorMessage = saveResult.ErrorMessage
@@ -51,9 +43,36 @@ namespace MessengerData.Providers
             }
             catch
             {
-                return new CreateResult<User>() { Result = false };
+                return new UpdateResult<User>() { Result = false };
             }
             
+        }
+
+        public async Task<UpdateResult<User>> UpdateUser(NewUserDTO newUserDTO)
+        {
+            var user = await _repository.FirstOrDefaultAsync(x => x.Name == newUserDTO.Name,null,false);
+            var result = new UpdateResult<User> { Result = false };
+            if (user == null)
+            {
+                result.ErrorMessage.Add("User not found");
+                return result;
+            }
+            user.UpdateUser(newUserDTO);
+
+            try
+            {
+                var saveResult = await _repository.SaveAsync();
+                return new UpdateResult<User>
+                {
+                    Result = saveResult.Result,
+                    Entity = user,
+                    ErrorMessage = saveResult.ErrorMessage
+                };
+            }
+            catch
+            {
+                return new UpdateResult<User>() { Result = false };
+            }
         }
 
     }
