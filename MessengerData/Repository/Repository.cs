@@ -152,11 +152,10 @@ namespace MessengerData.Repository
                 _context.SaveChanges();
                 return new SaveResult{ Result = true };
             }
-            catch(SqlException exeption)
+            catch (DbUpdateException exeption)
             {
                 var result = new SaveResult() { Result = false };
-
-                if (exeption.Number == 2601)
+                if ((exeption.InnerException as SqlException)?.Number == 2601)
                 {
                     result.ErrorMessage.Add("Duplicate field");
                 }
@@ -177,11 +176,10 @@ namespace MessengerData.Repository
                 await _context.SaveChangesAsync();
                 return new SaveResult { Result = true };
             }
-            catch(SqlException exeption)
+            catch (DbUpdateException exeption)
             {
                 var result = new SaveResult() { Result = false };
-
-                if (exeption.Number == 2601)
+                if ((exeption.InnerException as SqlException)?.Number == 2601)
                 {
                     result.ErrorMessage.Add("Duplicate field");
                 }
