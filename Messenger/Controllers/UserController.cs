@@ -26,7 +26,7 @@ namespace Messenger.Controllers
         {
 
             Guid userGuid;
-            if (!GetUserGuid(out userGuid))
+            if (!_provider.GetUserGuid(User, out userGuid))
             {
                 return StatusCode(500);
             }
@@ -91,7 +91,7 @@ namespace Messenger.Controllers
         public async Task<IActionResult> Put([FromBody] UpdateUserDTO updateUserDTO)
         {
             Guid userGuid;
-            if (!GetUserGuid(out userGuid))
+            if (!_provider.GetUserGuid(User, out userGuid))
             {
                 return StatusCode(500);
             }
@@ -120,7 +120,7 @@ namespace Messenger.Controllers
         {
 
             Guid userGuid;
-            if (!GetUserGuid(out userGuid))
+            if (!_provider.GetUserGuid(User, out userGuid))
             {
                 return StatusCode(500);
             }
@@ -135,26 +135,6 @@ namespace Messenger.Controllers
 
         }
 
-        public bool GetUserGuid(out Guid guid)
-        {
-
-            guid = Guid.Empty;
-            string? userGuidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (userGuidString == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                guid = new Guid(userGuidString);
-            }
-            catch
-            {
-                return false;
-            }
-            
-            return true;
 
         }
 

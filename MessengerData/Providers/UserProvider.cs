@@ -2,6 +2,7 @@
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Security.Claims;
 
 namespace MessengerData.Providers
 {
@@ -30,6 +31,29 @@ namespace MessengerData.Providers
         {
 
             return _context;
+
+        }
+
+        public bool GetUserGuid(ClaimsPrincipal user, out Guid guid)
+        {
+
+            guid = Guid.Empty;
+            string? userGuidString = user.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userGuidString == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                guid = new Guid(userGuidString);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
 
         }
 
