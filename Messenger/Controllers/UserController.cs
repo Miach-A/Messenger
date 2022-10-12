@@ -25,16 +25,14 @@ namespace Messenger.Controllers
         public async Task<IActionResult> Get()
         {
 
-            var guidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (guidString == null)
+            Guid userGuid;
+            if (!GetUserGuid(out userGuid))
             {
                 return StatusCode(500);
             }
 
-            var tt = await _provider.GetRepository().GetDbContext().Users.Where(x => x.Guid == new Guid(guidString)).Include(x => x.UserChats).Include(x => x.Contacts).FirstOrDefaultAsync();
-
             User? user = await _provider.GetRepository()
-                .FirstOrDefaultAsync(x => x.Guid == new Guid(guidString)
+                .FirstOrDefaultAsync(x => x.Guid == userGuid
                 , x => x.Include(y => y.UserChats)
                         .Include(y => y.Contacts));
                
@@ -92,8 +90,8 @@ namespace Messenger.Controllers
         [HttpPut]
         public async Task<IActionResult> Put([FromBody] UpdateUserDTO updateUserDTO)
         {
-            string? userGuidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (userGuidString == null)
+            Guid userGuid;
+            if (!GetUserGuid(out userGuid))
             {
                 return StatusCode(500);
             }
@@ -103,7 +101,7 @@ namespace Messenger.Controllers
                 return BadRequest();
             }
 
-            var result = await _provider.UpdateUserAsync(new Guid(userGuidString), updateUserDTO);
+            var result = await _provider.UpdateUserAsync(userGuid, updateUserDTO);
             if (result.Result)
             {
                 return Ok();
@@ -112,6 +110,37 @@ namespace Messenger.Controllers
             {
                 return StatusCode(500, result.ErrorMessage);
             }
+
+        }
+
+        [Authorize]
+        [HttpPut("~/ChangePassword")]
+        [ActionName("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] string newPassword)
+        {
+
+            return Ok();
+        }
+
+        public bool GetUserGuid(out Guid guid)
+        {
+            guid = Guid.Empty;
+            string? userGuidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userGuidString == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                guid = new Guid(userGuidString);
+            }
+            catch
+            {
+                return false;
+            }
+            
+            return true;
 
         }
 
