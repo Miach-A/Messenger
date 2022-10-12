@@ -7,14 +7,12 @@ using System.Threading.Tasks;
 
 namespace MessengerModel
 {
-    public class DeletedMessage
+    public class UserContacts
     {
-        public DateTime Date { get; set; }
-        public Message Message { get; set; } = null!;
-        public Guid MessageGuid { get; set; }
-        public Chat Chat { get; set; } = null!;
-        public Guid ChatGuid { get; set; }
         public User User { get; set; } = null!;
         public Guid UserGuid { get; set; }
+        public User Contact { get; set; } = null!;
+        public Guid ContactGuid { get; set; }
+        public string ContactName { get; set; } = null!;
     }
 }

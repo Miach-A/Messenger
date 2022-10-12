@@ -9,6 +9,10 @@ namespace MessengerModel
     public class Chat
     {
         public Guid Guid { get; set; }
-        public string Name { get; set; } = string.Empty;    
+        public string Name { get; set; } = string.Empty;
+        public bool Public { get; set; } = false;
+        public ICollection<UserChats> ChatUsers { get; set; } = new List<UserChats>();
+        public ICollection<Message> Messages { get; set; } = new List<Message>();
+        public ICollection<DeletedMessage> DeletedMessages { get; set; } = new List<DeletedMessage>();
     }
 }
