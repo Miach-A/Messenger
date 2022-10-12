@@ -38,7 +38,7 @@ namespace MessengerData.Providers
 
             var hasher = new PasswordHasher<User>();
             var user = new User();
-            UpdateUser(user, newUserDTO);
+            UpdateUserProperties(user, newUserDTO);
             user.PasswordHash = hasher.HashPassword(user, newUserDTO.Password);
             EntityEntry<User> entry = await _repository.AddAsync(user);
 
@@ -59,10 +59,10 @@ namespace MessengerData.Providers
             
         }
 
-        public async Task<UpdateResult<User>> UpdateUser(NewUserDTO newUserDTO)
+        public async Task<UpdateResult<User>> UpdateUserAsync(Guid guid, NewUserDTO newUserDTO)
         {
 
-            var user = await _repository.FirstOrDefaultAsync(x => x.Name == newUserDTO.Name,null,false);
+            var user = await _repository.FirstOrDefaultAsync(x => x.Guid == guid, null,false);
             var result = new UpdateResult<User> { Result = false };
             if (user == null)
             {
@@ -70,7 +70,7 @@ namespace MessengerData.Providers
                 return result;
             }
 
-            UpdateUser(user, newUserDTO);
+            UpdateUserProperties(user, newUserDTO);
 
             try
             {
@@ -89,7 +89,7 @@ namespace MessengerData.Providers
 
         }
 
-        public User UpdateUser(User user, NewUserDTO newUserDTO)
+        public User UpdateUserProperties(in User user, NewUserDTO newUserDTO)
         {
 
             user.Name = newUserDTO.Name;

@@ -28,10 +28,22 @@ namespace Messenger.Controllers
             var guidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
             if (guidString == null)
             {
-                return Unauthorized();
+                return StatusCode(500);
             }
-            Guid guid = new Guid(guidString);
-            return Ok(await _provider.GetRepository().Get(x => x.Guid == guid,null, x => x.Include(y => y.UserChats).Include(y => y.Contacts)).ToArrayAsync());
+
+            User? user = await _provider.GetRepository()
+                .Get(x => x.Guid == new Guid(guidString)
+                , null
+                , x => x.Include(y => y.UserChats)
+                        .Include(y => y.Contacts))
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return StatusCode(500);
+            }
+
+            return Ok(_provider.ToUserDTO(user));
         
         }
 
@@ -46,13 +58,14 @@ namespace Messenger.Controllers
                 && lastname == null ? true : x.LastName.Contains(lastname!)
                 && phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!);
 
-
             Func<IQueryable<User>, IOrderedQueryable<User>>? order = 
                 orderby == null 
                 ? null 
                 : (x) => x.OrderBy(orderby);
 
-            return Ok(await _provider.GetRepository().Get(filter, order).ToArrayAsync());
+            User[] users = await _provider.GetRepository().Get(filter, order).ToArrayAsync();
+
+            return Ok(_provider.ToContactDTO(users));
 
         }
 
@@ -75,14 +88,21 @@ namespace Messenger.Controllers
         }
 
         [Authorize]
-        [HttpPut("{guid}")]
-        public async Task<IActionResult> Put(Guid guid, [FromBody] NewUserDTO newUserDTO)
+        [HttpPut]
+        public async Task<IActionResult> Put([FromBody] NewUserDTO newUserDTO)
         {
+            string? userGuidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userGuidString == null)
+            {
+                return StatusCode(500);
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            var result = await _provider.UpdateUser(newUserDTO);
+
+            var result = await _provider.UpdateUserAsync(new Guid(userGuidString), newUserDTO);
             if (result.Result)
             {
                 return Ok();
