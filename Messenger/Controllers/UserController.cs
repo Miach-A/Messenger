@@ -88,20 +88,27 @@ namespace Messenger.Controllers
 
         [Authorize]
         [HttpPost("~/api/PostContact/")]
-        public async Task<IActionResult> PostContact([FromBody] string name)
+        public async Task<IActionResult> PostContact([FromBody] string contactName)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            var result = await _provider.CreateUserAsync(newUserDTO);
-            if (result.Result)
+
+            Guid userGuid;
+            if (!_provider.GetUserGuid(User, out userGuid))
+            {
+                return StatusCode(500);
+            }
+
+            var result = await _provider.AddContact(userGuid, contactName);
+            if (result)
             {
                 return StatusCode(201);
             }
             else
             {
-                return StatusCode(500, result.ErrorMessage);
+                return StatusCode(500);
             }
         }
 

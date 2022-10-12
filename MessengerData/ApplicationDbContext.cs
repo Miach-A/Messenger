@@ -47,6 +47,7 @@ namespace MessengerData
             modelBuilder.Entity<UserChats>().HasOne(x => x.User).WithMany(x => x.UserChats).HasForeignKey(x => x.UserGuid).OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<UserContacts>().HasOne(x => x.Contact).WithMany(x => x.Contacts).HasForeignKey(x => x.ContactGuid).OnDelete(DeleteBehavior.ClientCascade);
+            modelBuilder.Entity<UserContacts>().HasOne(x => x.User).WithMany(x => x.IAsContact).HasForeignKey(x => x.UserGuid).OnDelete(DeleteBehavior.ClientCascade);
         }
     }
 }

@@ -175,11 +175,11 @@ namespace MessengerData.Providers
             return contactDTO;
         }
     
-        public async Task<bool> AddContact(Guid guid, string name)
+        public async Task<bool> AddContact(Guid userGuid, string contactName)
         {
             var user = await _repository
-                .FirstOrDefaultAsync(x => x.Guid == guid
-                    , x => x.Include(y => y.Contacts).ThenInclude(y => y.Contact)
+                .FirstOrDefaultAsync(x => x.Guid == userGuid
+                    , x => x.Include(y => y.Contacts)//.ThenInclude(y => y.Contact)
                     , false);
 
             if (user == null)
@@ -188,7 +188,7 @@ namespace MessengerData.Providers
             }
 
             var contact = await _repository
-                .FirstOrDefaultAsync(x => x.Name == name);
+                .FirstOrDefaultAsync(x => x.Name == contactName);
 
             if (contact == null)
             {
@@ -200,7 +200,7 @@ namespace MessengerData.Providers
                 return false;
             }
 
-            user.Contacts.Add(new UserContacts() { User = user, Contact = contact, ContactName = name });
+            user.Contacts.Add(new UserContacts() { User = user, Contact = contact, ContactName = contactName });
             var result = await _repository.SaveAsync();
 
             return result.Result;
