@@ -33,33 +33,33 @@ namespace Messenger.Controllers
 
             User? user = await _provider.GetRepository()
                 .FirstOrDefaultAsync(x => x.Guid == userGuid
-                , x => x.Include(y => y.UserChats)
+                ,x => x.Include(y => y.UserChats)
                         .Include(y => y.Contacts));
-               
+
             if (user == null)
             {
                 return StatusCode(500);
             }
 
             return Ok(_provider.ToUserDTO(user));
-        
+
         }
 
         [Authorize]
-        [HttpGet("~/api/GetContacts")]
-        [ActionName("GetContacts")]
-        public async Task<IActionResult> GetContacts(string? name, string? firstname, string? lastname, string? phonenumber,string? orderby, int pageindex = 0, int pagesize = 20)
+        [HttpGet("~/api/GetUsers")]
+        [ActionName("GetUsers")]
+        public async Task<IActionResult> GetUsers(string? name, string? firstname, string? lastname, string? phonenumber, string? orderby, int pageindex = 0, int pagesize = 20)
         {
 
-            Expression<Func<User, bool>> filter = (x) =>      
+            Expression<Func<User, bool>> filter = (x) =>
                 name == null ? true : x.Name.Contains(name)
                 && firstname == null ? true : x.FirstName.Contains(firstname!)
                 && lastname == null ? true : x.LastName.Contains(lastname!)
                 && phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!);
 
-            Func<IQueryable<User>, IOrderedQueryable<User>>? order = 
-                orderby == null 
-                ? null 
+            Func<IQueryable<User>, IOrderedQueryable<User>>? order =
+                orderby == null
+                ? null
                 : (x) => x.OrderBy(orderby);
 
             User[] users = await _provider.GetRepository().Get(filter, order).ToArrayAsync();
@@ -70,6 +70,25 @@ namespace Messenger.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateUserDTO newUserDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _provider.CreateUserAsync(newUserDTO);
+            if (result.Result)
+            {
+                return StatusCode(201);
+            }
+            else
+            {
+                return StatusCode(500, result.ErrorMessage);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("~/api/PostContact/")]
+        public async Task<IActionResult> PostContact([FromBody] string name)
         {
             if (!ModelState.IsValid)
             {
