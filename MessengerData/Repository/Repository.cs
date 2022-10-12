@@ -122,7 +122,7 @@ namespace MessengerData.Repository
                 query =  orderBy(query);
             }
 
-            query = query.Skip(pageIndex * pageSize).Take(pageIndex);
+            query = query.Skip(pageIndex * pageSize).Take(pageSize);
             return query;
         }
 

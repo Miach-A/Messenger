@@ -31,13 +31,13 @@ namespace Messenger.Controllers
                 return StatusCode(500);
             }
 
-            User? user = await _provider.GetRepository()
-                .Get(x => x.Guid == new Guid(guidString)
-                , null
-                , x => x.Include(y => y.UserChats)
-                        .Include(y => y.Contacts))
-                .FirstOrDefaultAsync();
+            var tt = await _provider.GetRepository().GetDbContext().Users.Where(x => x.Guid == new Guid(guidString)).Include(x => x.UserChats).Include(x => x.Contacts).FirstOrDefaultAsync();
 
+            User? user = await _provider.GetRepository()
+                .FirstOrDefaultAsync(x => x.Guid == new Guid(guidString)
+                , x => x.Include(y => y.UserChats)
+                        .Include(y => y.Contacts));
+               
             if (user == null)
             {
                 return StatusCode(500);
@@ -48,8 +48,9 @@ namespace Messenger.Controllers
         }
 
         [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> Get(string? name, string? firstname, string? lastname, string? phonenumber,string? orderby, int pageindex = 0, int pagesize = 20)
+        [HttpGet("~/GetContacts")]
+        [ActionName("GetContacts")]
+        public async Task<IActionResult> GetContacts(string? name, string? firstname, string? lastname, string? phonenumber,string? orderby, int pageindex = 0, int pagesize = 20)
         {
 
             Expression<Func<User, bool>> filter = (x) =>      
@@ -89,7 +90,7 @@ namespace Messenger.Controllers
 
         [Authorize]
         [HttpPut]
-        public async Task<IActionResult> Put([FromBody] NewUserDTO newUserDTO)
+        public async Task<IActionResult> Put([FromBody] UpdateUserDTO updateUserDTO)
         {
             string? userGuidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
             if (userGuidString == null)
@@ -102,7 +103,7 @@ namespace Messenger.Controllers
                 return BadRequest();
             }
 
-            var result = await _provider.UpdateUserAsync(new Guid(userGuidString), newUserDTO);
+            var result = await _provider.UpdateUserAsync(new Guid(userGuidString), updateUserDTO);
             if (result.Result)
             {
                 return Ok();

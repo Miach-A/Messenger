@@ -59,7 +59,7 @@ namespace MessengerData.Providers
             
         }
 
-        public async Task<UpdateResult<User>> UpdateUserAsync(Guid guid, NewUserDTO newUserDTO)
+        public async Task<UpdateResult<User>> UpdateUserAsync(Guid guid, UpdateUserDTO updateUserDTO)
         {
 
             var user = await _repository.FirstOrDefaultAsync(x => x.Guid == guid, null,false);
@@ -70,7 +70,7 @@ namespace MessengerData.Providers
                 return result;
             }
 
-            UpdateUserProperties(user, newUserDTO);
+            UpdateUserProperties(user, updateUserDTO);
 
             try
             {
@@ -89,7 +89,7 @@ namespace MessengerData.Providers
 
         }
 
-        public User UpdateUserProperties(in User user, NewUserDTO newUserDTO)
+        public User UpdateUserProperties(in User user, UpdateUserDTO newUserDTO)
         {
 
             user.Name = newUserDTO.Name;
