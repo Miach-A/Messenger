@@ -57,7 +57,7 @@ namespace MessengerData.Providers
 
         }
 
-        public async Task<UpdateResult<User>> CreateUserAsync(NewUserDTO newUserDTO)
+        public async Task<UpdateResult<User>> CreateUserAsync(CreateUserDTO newUserDTO)
         {
 
             var hasher = new PasswordHasher<User>();

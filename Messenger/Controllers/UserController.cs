@@ -46,7 +46,7 @@ namespace Messenger.Controllers
         }
 
         [Authorize]
-        [HttpGet("~/GetContacts")]
+        [HttpGet("~/api/GetContacts")]
         [ActionName("GetContacts")]
         public async Task<IActionResult> GetContacts(string? name, string? firstname, string? lastname, string? phonenumber,string? orderby, int pageindex = 0, int pagesize = 20)
         {
@@ -69,7 +69,7 @@ namespace Messenger.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] NewUserDTO newUserDTO)
+        public async Task<IActionResult> Post([FromBody] CreateUserDTO newUserDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -114,7 +114,7 @@ namespace Messenger.Controllers
         }
 
         [Authorize]
-        [HttpPut("~/ChangePassword")]
+        [HttpPut("~/api/ChangePassword")]
         [ActionName("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] string password)
         {

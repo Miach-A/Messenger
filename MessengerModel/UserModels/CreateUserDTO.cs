@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MessengerModel.UserModels
 {
-    public class NewUserDTO : UpdateUserDTO
+    public class CreateUserDTO : UpdateUserDTO
     {
         public string Password { get; set; } = string.Empty;
     }
