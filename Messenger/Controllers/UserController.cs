@@ -24,6 +24,7 @@ namespace Messenger.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
+
             var guidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
             if (guidString == null)
             {
@@ -31,15 +32,14 @@ namespace Messenger.Controllers
             }
             Guid guid = new Guid(guidString);
             return Ok(await _provider.GetRepository().Get(x => x.Guid == guid,null, x => x.Include(y => y.UserChats).Include(y => y.Contacts)).ToArrayAsync());
+        
         }
 
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get(string? name, string? firstname, string? lastname, string? phonenumber,string? orderby, int pageindex = 0, int pagesize = 20)
         {
-            var rr = User.Identity;
-            var tt = new Claim(JwtRegisteredClaimNames.Sub, "dfdf");
-            var guidString = User.FindFirst(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
             Expression<Func<User, bool>> filter = (x) =>      
                 name == null ? true : x.Name.Contains(name)
                 && firstname == null ? true : x.FirstName.Contains(firstname!)
@@ -53,6 +53,7 @@ namespace Messenger.Controllers
                 : (x) => x.OrderBy(orderby);
 
             return Ok(await _provider.GetRepository().Get(filter, order).ToArrayAsync());
+
         }
 
         [HttpPost]

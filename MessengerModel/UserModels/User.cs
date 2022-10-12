@@ -12,12 +12,6 @@
         public ICollection<Message> Messages { get; set; } = new List<Message>();
         public ICollection<UserContacts> Contacts { get; set; } = new List<UserContacts>();
         public ICollection<DeletedMessage> DeletedMessages { get; set; } = new List<DeletedMessage>();
-        public void UpdateUser(NewUserDTO newUserDTO)
-        {
-            Name = newUserDTO.Name;
-            FirstName = newUserDTO.FirstName;
-            LastName = newUserDTO.LastName;
-            PhoneNumber = newUserDTO.PhoneNumber;
-        }
+
     }
 }
