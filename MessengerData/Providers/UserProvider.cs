@@ -59,6 +59,21 @@ namespace MessengerData.Providers
             
         }
 
+        public async Task<bool> ChangePasswordAsync(Guid userGuid, string password)
+        {
+
+            var user = await _repository.FirstOrDefaultAsync(x => x.Guid == userGuid,null,false);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var hasher = new PasswordHasher<User>();
+            user.PasswordHash = hasher.HashPassword(user, password);
+            var saveResult = await _repository.SaveAsync();
+            return saveResult.Result;
+
+        }
         public async Task<UpdateResult<User>> UpdateUserAsync(Guid guid, UpdateUserDTO updateUserDTO)
         {
 

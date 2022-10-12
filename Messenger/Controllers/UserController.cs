@@ -116,14 +116,28 @@ namespace Messenger.Controllers
         [Authorize]
         [HttpPut("~/ChangePassword")]
         [ActionName("ChangePassword")]
-        public async Task<IActionResult> ChangePassword([FromBody] string newPassword)
+        public async Task<IActionResult> ChangePassword([FromBody] string password)
         {
 
+            Guid userGuid;
+            if (!GetUserGuid(out userGuid))
+            {
+                return StatusCode(500);
+            }
+
+            var result = await _provider.ChangePasswordAsync(userGuid, password);
+            if (!result)
+            {
+                return StatusCode(500);
+            }
+
             return Ok();
+
         }
 
         public bool GetUserGuid(out Guid guid)
         {
+
             guid = Guid.Empty;
             string? userGuidString = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
             if (userGuidString == null)

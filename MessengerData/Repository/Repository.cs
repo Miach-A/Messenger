@@ -140,6 +140,7 @@ namespace MessengerData.Repository
         {
             return _dbSet.Update(entity);
         }
+
         public void UpdateRange(T entity)
         {
             _dbSet.UpdateRange(entity);
