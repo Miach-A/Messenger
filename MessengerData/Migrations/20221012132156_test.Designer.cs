@@ -4,6 +4,7 @@ using MessengerData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MessengerData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221012132156_test")]
+    partial class test
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -274,13 +276,13 @@ namespace MessengerData.Migrations
             modelBuilder.Entity("MessengerModel.UserContacts", b =>
                 {
                     b.HasOne("MessengerModel.UserModels.User", "Contact")
-                        .WithMany()
+                        .WithMany("Contacts")
                         .HasForeignKey("ContactGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("MessengerModel.UserModels.User", "User")
-                        .WithMany("Contacts")
+                        .WithMany("IAsContact")
                         .HasForeignKey("UserGuid")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
@@ -309,6 +311,8 @@ namespace MessengerData.Migrations
                     b.Navigation("Contacts");
 
                     b.Navigation("DeletedMessages");
+
+                    b.Navigation("IAsContact");
 
                     b.Navigation("Messages");
 
