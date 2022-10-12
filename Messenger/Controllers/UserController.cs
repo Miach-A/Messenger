@@ -133,10 +133,7 @@ namespace Messenger.Controllers
 
             return Ok();
 
-        }
-
-
-        }
+        } 
 
     }
 }
