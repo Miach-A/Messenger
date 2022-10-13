@@ -14,8 +14,8 @@ namespace Messenger.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private UserProvider _provider;
-        public UserController(UserProvider provider)
+        private UserProviderOld _provider;
+        public UserController(UserProviderOld provider)
         {
             _provider = provider;
         }
@@ -23,7 +23,11 @@ namespace Messenger.Controllers
         [HttpGet("~/api/test")]
         public IActionResult GetTest()
         {
-            var user = _provider.GetRepository().Get(null, null, x => x.Include(y => y.Contacts).ThenInclude(y => y.Contact).Include(y => y.IAsContact).ThenInclude(y => y.User)).ToArray();
+            var user = _provider.GetRepository().Get(null, null,
+                x => x
+                    .Include(y => y.Contacts).ThenInclude(y => y.Contact)
+                    .Include(y => y.IAsContact).ThenInclude(y => y.User))
+                .ToArray();
             return Ok();
         }
 
@@ -31,7 +35,6 @@ namespace Messenger.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-
             Guid userGuid;
             if (!_provider.GetUserGuid(User, out userGuid))
             {
@@ -49,7 +52,6 @@ namespace Messenger.Controllers
             }
 
             return Ok(_provider.ToUserDTO(user));
-
         }
 
         [Authorize]
@@ -57,7 +59,6 @@ namespace Messenger.Controllers
         [ActionName("GetUsers")]
         public async Task<IActionResult> GetUsers(string? name, string? firstname, string? lastname, string? phonenumber, string? orderby, int pageindex = 0, int pagesize = 20)
         {
-
             Expression<Func<User, bool>> filter = (x) =>
                 name == null ? true : x.Name.Contains(name)
                 && firstname == null ? true : x.FirstName.Contains(firstname!)
@@ -72,7 +73,6 @@ namespace Messenger.Controllers
             User[] users = await _provider.GetRepository().Get(filter, order).ToArrayAsync();
 
             return Ok(_provider.ToContactDTO(users));
-
         }
 
         [HttpPost]
@@ -169,7 +169,6 @@ namespace Messenger.Controllers
             {
                 return StatusCode(500, result.ErrorMessage);
             }
-
         }
 
         [Authorize]
@@ -177,7 +176,6 @@ namespace Messenger.Controllers
         [ActionName("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] string password)
         {
-
             Guid userGuid;
             if (!_provider.GetUserGuid(User, out userGuid))
             {
@@ -191,7 +189,6 @@ namespace Messenger.Controllers
             }
 
             return Ok();
-
         } 
 
     }

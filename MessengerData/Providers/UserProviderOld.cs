@@ -1,22 +1,32 @@
-﻿using MessengerModel;
+﻿using MessengerData.Repository;
+using MessengerModel;
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Security.Claims;
 
 namespace MessengerData.Providers
 {
-    public class UserProvider
+    public class UserProviderOld
     {
-        private ApplicationDbContext _context;
+        private IRepository<User> _repository;
 
-        public UserProvider(ApplicationDbContext context)
+        public UserProviderOld(ApplicationDbContext context, IRepository<User> repository)
         {
-            _context = context;
+            _repository = repository;
         }
         
+        public IRepository<User> GetRepository()
+        {
+            return _repository;
+        }
+
+        public ApplicationDbContext GetDbContext()
+        {
+            return _repository.GetDbContext();
+        }
+
         public bool GetUserGuid(ClaimsPrincipal user, out Guid guid)
         {
             guid = Guid.Empty;
@@ -42,43 +52,63 @@ namespace MessengerData.Providers
         {
             var hasher = new PasswordHasher<User>();
             var user = new User();
-
             UpdateUserProperties(user, newUserDTO);
-
             user.PasswordHash = hasher.HashPassword(user, newUserDTO.Password);
-            EntityEntry<User> entry = await _context.Users.AddAsync(user);
-
-            var saveResult = await SaveAsync();
-            return new UpdateResult<User>(saveResult){ Entity = entry.Entity };
+            EntityEntry<User> entry = await _repository.AddAsync(user);
+            try
+            {
+                var saveResult = await _repository.SaveAsync();
+                return new UpdateResult<User>{
+                    Result = saveResult.Result,
+                    Entity = entry.Entity,
+                    ErrorMessage = saveResult.ErrorMessage
+                };
+            }
+            catch
+            {
+                return new UpdateResult<User>() { Result = false };
+            }
         }
 
-        public async Task<SaveResult> ChangePasswordAsync(Guid userGuid, string password)
+        public async Task<bool> ChangePasswordAsync(Guid userGuid, string password)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Guid == userGuid);
+            var user = await _repository.FirstOrDefaultAsync(x => x.Guid == userGuid,null,false);
             if (user == null)
             {
-                return new UpdateResult<User>("User provider. Change password. User not found."); //{ Result = false, ErrorMessage = new List<string> { "User provider. Change password. User not found." } };
+                return false;
             }
 
             var hasher = new PasswordHasher<User>();
             user.PasswordHash = hasher.HashPassword(user, password);
-
-            return await SaveAsync(); 
+            var saveResult = await _repository.SaveAsync();
+            return saveResult.Result;
         }
         
         public async Task<UpdateResult<User>> UpdateUserAsync(Guid guid, UpdateUserDTO updateUserDTO)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Guid == guid);
+            var user = await _repository.FirstOrDefaultAsync(x => x.Guid == guid, null,false);
             var result = new UpdateResult<User> { Result = false };
             if (user == null)
             {
                 result.ErrorMessage.Add("User not found");
-                return new UpdateResult<User>("User provider. Update user. User not found."); //{ Result = false, ErrorMessage = new List<string> { "User provider. Update user. User not found." } };
+                return result;
             }
 
             UpdateUserProperties(user, updateUserDTO);
-
-            return new UpdateResult<User>(await SaveAsync()) { Entity = user };
+            try
+            {
+                var saveResult = await _repository.SaveAsync();
+                return new UpdateResult<User>
+                {
+                    Result = saveResult.Result,
+                    Entity = user,
+                    ErrorMessage = saveResult.ErrorMessage
+                };
+            }
+            catch
+            {
+                return new UpdateResult<User>() { Result = false };
+            }
         }
 
         public User UpdateUserProperties(in User user, UpdateUserDTO newUserDTO)
@@ -145,91 +175,75 @@ namespace MessengerData.Providers
             return contactDTO;
         }
     
-        public async Task<SaveResult> AddContact(Guid userGuid, string contactName)
+        public async Task<bool> AddContact(Guid userGuid, string contactName)
         {
-            var user = await _context.Users
-                .Include(x => x.Contacts).ThenInclude(x => x.Contact)
-                .FirstOrDefaultAsync(x => x.Guid == userGuid);
+            var user = await _repository
+                .FirstOrDefaultAsync(x => x.Guid == userGuid
+                    , x => x.Include(y => y.Contacts).ThenInclude(y => y.Contact)
+                    , false);
 
-            var contact = await _context.Users.FirstOrDefaultAsync(x => x.Name == contactName);
-            if (user == null 
-                || contact == null
-                || user.Contacts.Where(x => x.ContactGuid == contact.Guid).Count() > 0)
+            if (user == null)
             {
-                return new SaveResult("User provider. Add contact. User not found or contact is exist.");// { Result = false, ErrorMessage = new List<string> { "User provider. Add contact. User not found or contact is exist." } };
+                return false;
+            }
+
+            var contact = await _repository
+                .FirstOrDefaultAsync(x => x.Name == contactName);
+
+            if (contact == null)
+            {
+                return false;
+            }
+
+            if (user.Contacts.Where(x => x.ContactGuid == contact.Guid).Count() > 0)
+            {
+                return false;
             }
 
             user.Contacts.Add(new UserContacts() { User = user, Contact = contact, ContactName = contactName });
-    
-            return await SaveAsync();
+            var result = await _repository.SaveAsync();
+
+            return result.Result;
         }    
 
-        public async Task<SaveResult> DeleteContact(Guid userGuid, string contactName)
+        public async Task<bool> DeleteContact(Guid userGuid, string contactName)
         {
-            var user = await _context.Users
-                .Include(x => x.Contacts)
-                    .ThenInclude(x => x.Contact)
-                .FirstOrDefaultAsync(x => x.Guid == userGuid);
+            var user = await _repository
+               .FirstOrDefaultAsync(x => x.Guid == userGuid
+                   , x => x.Include(y => y.Contacts).ThenInclude(y => y.Contact)
+                   , false);
             if (user == null)
             {
-                return new SaveResult("User provider. Delete contact. User not found.");// { Result = false, ErrorMessage = new List<string> { "User provider. Delete contact. User not found." } };
+                return false;
             }
 
-            var userContactsForDelete = user.Contacts.FirstOrDefault(x => x.Contact.Name == contactName);
+            var userContactsForDelete = user.Contacts.Where(x => x.Contact.Name == contactName).FirstOrDefault();
             if (userContactsForDelete == null)
             {
-                return new SaveResult("User provider. Delete contact. Contact not found.");
+                return false;
             }
 
             user.Contacts.Remove(userContactsForDelete);
-            return await SaveAsync();
+            var result = await _repository.SaveAsync();
+            return result.Result;
         }
     
-        public async Task<SaveResult> AddChat(Guid userGuid, string contactName)
+        public async Task<bool> AddChat(Guid userGuid, string contactName)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Guid == userGuid);
-            var contact = await _context.Users.FirstOrDefaultAsync(x => x.Name == contactName);
+            var user = await _repository.FirstOrDefaultAsync(x => x.Guid == userGuid, null, false);
+            var contact = await _repository.FirstOrDefaultAsync(x => x.Name == contactName,null,false);
             if (user == null || contact == null)
             {
-                return new SaveResult("User provider. Add chat. User or contact name not found"); //{ Result = false , ErrorMessage = new List<string>() { "User or contact name not found" } };
+                return false;
             }
             
-            Chat chat = new Chat();
+            var chat = new Chat();
             chat.Name = string.Concat(user.Name,"-",contact.Name);
             chat.ChatUsers.Add(new UserChats { Chat = chat, User = user });
             chat.ChatUsers.Add(new UserChats { Chat = chat, User = contact });
+
+
             
-            _context.Chats.Add(chat);
-
-            return await SaveAsync();
-        }
-
-        public async Task<SaveResult> SaveAsync()
-        {
-            try
-            {
-                await _context.SaveChangesAsync();
-                return new SaveResult { Result = true };
-            }
-            catch (DbUpdateException exeption)
-            {
-                var result = new SaveResult() { Result = false };
-                if ((exeption.InnerException as SqlException)?.Number == 2601)
-                {
-                    result.ErrorMessage.Add("User provider. Save changes. Duplicate field");
-                }
-
-                if (result.ErrorMessage.Count() == 0)
-                {
-                    result.ErrorMessage.Add("User provider. Save changes. Unhandled db update exception");
-                }
-
-                return result;
-            }
-            catch
-            {
-                return new SaveResult() { Result = false, ErrorMessage = new List<string>() { "User provider. Save changes. Unhandled exception" } };
-            }
         }
     }
 }
