@@ -4,6 +4,7 @@ using MessengerData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MessengerData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221013073240_test3")]
+    partial class test3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,7 +39,7 @@ namespace MessengerData.Migrations
 
                     b.HasKey("Guid");
 
-                    b.ToTable("Chats", (string)null);
+                    b.ToTable("Chats");
                 });
 
             modelBuilder.Entity("MessengerModel.DeletedMessage", b =>
@@ -60,7 +62,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("UserGuid");
 
-                    b.ToTable("DeletedMessage", (string)null);
+                    b.ToTable("DeletedMessage");
                 });
 
             modelBuilder.Entity("MessengerModel.Message", b =>
@@ -90,7 +92,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("UserGuid");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("MessengerModel.MessageComment", b =>
@@ -114,7 +116,7 @@ namespace MessengerData.Migrations
                     b.HasIndex("MessageDate", "MessageGuid")
                         .IsUnique();
 
-                    b.ToTable("MessageComment", (string)null);
+                    b.ToTable("MessageComment");
                 });
 
             modelBuilder.Entity("MessengerModel.UserChats", b =>
@@ -129,7 +131,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("UserGuid");
 
-                    b.ToTable("UserChats", (string)null);
+                    b.ToTable("UserChats");
                 });
 
             modelBuilder.Entity("MessengerModel.UserContacts", b =>
@@ -148,7 +150,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("ContactGuid");
 
-                    b.ToTable("UserContacts", (string)null);
+                    b.ToTable("UserContacts");
                 });
 
             modelBuilder.Entity("MessengerModel.UserModels.User", b =>
@@ -184,7 +186,7 @@ namespace MessengerData.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("MessengerModel.DeletedMessage", b =>

@@ -179,7 +179,7 @@ namespace MessengerData.Providers
         {
             var user = await _repository
                 .FirstOrDefaultAsync(x => x.Guid == userGuid
-                    , x => x.Include(y => y.Contacts)//.ThenInclude(y => y.Contact)
+                    , x => x.Include(y => y.Contacts).ThenInclude(y => y.Contact)
                     , false);
 
             if (user == null)

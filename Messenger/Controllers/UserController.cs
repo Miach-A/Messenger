@@ -20,6 +20,13 @@ namespace Messenger.Controllers
             _provider = provider;
         }
 
+        [HttpGet("~/api/test")]
+        public IActionResult GetTest()
+        {
+            var user = _provider.GetRepository().Get(null, null, x => x.Include(y => y.Contacts).ThenInclude(y => y.Contact).Include(y => y.IAsContact).ThenInclude(y => y.User)).ToArray();
+            return Ok();
+        }
+
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get()
