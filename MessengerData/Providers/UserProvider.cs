@@ -195,7 +195,7 @@ namespace MessengerData.Providers
                 return false;
             }
 
-            if (user.Contacts.Where(x => x.Contact.Guid == contact.Guid).Count() > 0)
+            if (user.Contacts.Where(x => x.ContactGuid == contact.Guid).Count() > 0)
             {
                 return false;
             }
@@ -205,5 +205,27 @@ namespace MessengerData.Providers
 
             return result.Result;
         }    
+
+        public async Task<bool> DeleteContact(Guid userGuid, string contactName)
+        {
+            var user = await _repository
+               .FirstOrDefaultAsync(x => x.Guid == userGuid
+                   , x => x.Include(y => y.Contacts).ThenInclude(y => y.Contact)
+                   , false);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var userContactsForDelete = user.Contacts.Where(x => x.Contact.Name == contactName).FirstOrDefault();
+            if (userContactsForDelete == null)
+            {
+                return false;
+            }
+
+            user.Contacts.Remove(userContactsForDelete);
+            var result = await _repository.SaveAsync();
+            return result.Result;
+        }
     }
 }

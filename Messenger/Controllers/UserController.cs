@@ -111,7 +111,33 @@ namespace Messenger.Controllers
             var result = await _provider.AddContact(userGuid, contactName);
             if (result)
             {
-                return StatusCode(201);
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(500);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("~/api/DeleteContact/")]
+        public async Task<IActionResult> DeleteContact([FromBody] string contactName)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            Guid userGuid;
+            if (!_provider.GetUserGuid(User, out userGuid))
+            {
+                return StatusCode(500);
+            }
+
+            var result = await _provider.DeleteContact(userGuid, contactName);
+            if (result)
+            {
+                return StatusCode(204);
             }
             else
             {
