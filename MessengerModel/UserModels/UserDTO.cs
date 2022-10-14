@@ -9,6 +9,6 @@ namespace MessengerModel.UserModels
     public class UserDTO : UpdateUserDTO
     {
         public ICollection<UserChats> UserChats { get; set; } = new List<UserChats>();
-        public ICollection<UserContacts> Contacts { get; set; } = new List<UserContacts>();
+        public ICollection<ContactDTO> Contacts { get; set; } = new List<ContactDTO>(); //UserContacts
     }
 }

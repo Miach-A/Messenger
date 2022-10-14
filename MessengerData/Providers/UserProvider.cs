@@ -130,7 +130,11 @@ namespace MessengerData.Providers
             userDTO.LastName = user.LastName;
             userDTO.PhoneNumber = user.PhoneNumber;
             userDTO.UserChats = user.UserChats;
-            userDTO.Contacts = user.Contacts;
+            //userDTO.Contacts = user.Contacts;
+            foreach (var contact in user.Contacts)
+            {
+                userDTO.Contacts.Add(new ContactDTO { Name = contact.Contact.Name, FirstName = contact.Contact.FirstName, LastName = contact.Contact.LastName, PhoneNumber = contact.Contact.PhoneNumber });
+            }
 
             return userDTO;
         }

@@ -49,8 +49,8 @@ namespace Messenger.Controllers
             //            .Include(y => y.Contacts));
 
             User? user = await _context.Users
-                .Include(x => x.UserChats)
-                .Include(x => x.Contacts)
+                .Include(x => x.UserChats).ThenInclude(x => x.Chat)
+                .Include(x => x.Contacts).ThenInclude(x => x.Contact)
                 .FirstOrDefaultAsync(x => x.Guid == userGuid);
 
             if (user == null)
@@ -198,14 +198,6 @@ namespace Messenger.Controllers
             }
 
             return Ok();
-        }
-
-        public static Expression<Func<T, string>> CreateSelectorExpression<T>(string propertyName)
-        {
-            
-            var paramterExpression = Expression.Parameter(typeof(T));
-            return (Expression<Func<T, string>>)Expression.Lambda(Expression.PropertyOrField(paramterExpression, propertyName),
-                                                                    paramterExpression);
         }
 
         public enum UserOrderBy

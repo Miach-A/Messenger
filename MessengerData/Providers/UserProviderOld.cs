@@ -160,7 +160,7 @@ namespace MessengerData.Providers
             userDTO.LastName = user.LastName;
             userDTO.PhoneNumber = user.PhoneNumber;
             userDTO.UserChats = user.UserChats;
-            userDTO.Contacts = user.Contacts;
+            //userDTO.Contacts = user.Contacts;
 
             return userDTO;
         }
