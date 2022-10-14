@@ -187,6 +187,32 @@ namespace Messenger.Controllers
             return Ok();
         }
 
+        [Authorize]
+        [HttpPost("~/api/PostChat/")]
+        public async Task<IActionResult> PostChat([FromBody] string contactName)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            Guid userGuid;
+            if (!_provider.GetUserGuid(User, out userGuid))
+            {
+                return StatusCode(500);
+            }
+
+            var result = await _provider.AddChat(userGuid, contactName);
+            if (result.Result)
+            {
+                return StatusCode(201, _provider.ToChatDTO(result.Entity));
+            }
+            else
+            {
+                return StatusCode(500, result.ErrorMessage);
+            }
+        }
+
         public enum UserOrderBy
         {
             Name,

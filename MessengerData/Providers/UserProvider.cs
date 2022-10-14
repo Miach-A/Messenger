@@ -156,7 +156,7 @@ namespace MessengerData.Providers
 
             foreach (var contact in user.Contacts)
             {
-                userDTO.Contacts.Add(ToContactDTO(contact.Contact)); //new ContactDTO { Name = contact.Contact.Name, FirstName = contact.Contact.FirstName, LastName = contact.Contact.LastName, PhoneNumber = contact.Contact.PhoneNumber }
+                userDTO.Contacts.Add(ToContactDTO(contact.Contact));
             }
 
             return userDTO;
@@ -212,13 +212,13 @@ namespace MessengerData.Providers
             return await SaveAsync();
         }
     
-        public async Task<SaveResult> AddChat(Guid userGuid, string contactName)
+        public async Task<UpdateResult<Chat>> AddChat(Guid userGuid, string contactName)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Guid == userGuid);
             var contact = await _context.Users.FirstOrDefaultAsync(x => x.Name == contactName);
             if (user == null || contact == null)
             {
-                return new SaveResult(false,"User provider. Add chat. User or contact name not found"); //{ Result = false , ErrorMessage = new List<string>() { "User or contact name not found" } };
+                return new UpdateResult<Chat>(false,"User provider. Add chat. User or contact name not found");
             }
             
             Chat chat = new Chat();
