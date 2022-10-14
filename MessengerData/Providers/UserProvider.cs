@@ -228,7 +228,7 @@ namespace MessengerData.Providers
             
             _context.Chats.Add(chat);
 
-            return  new UpdateResult<Chat>(await SaveAsync()){ Entity = chat };
+            return  new UpdateResult<Chat>(await SaveAsync()){ Entity = chat }; //dd
         }
 
         public async Task<SaveResult> SaveAsync()
