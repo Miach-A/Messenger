@@ -43,11 +43,6 @@ namespace Messenger.Controllers
                 return StatusCode(500);
             }
 
-            //User? user = await _provider.GetRepository()
-            //    .FirstOrDefaultAsync(x => x.Guid == userGuid
-            //    ,x => x.Include(y => y.UserChats)
-            //            .Include(y => y.Contacts));
-
             User? user = await _context.Users
                 .Include(x => x.UserChats).ThenInclude(x => x.Chat)
                 .Include(x => x.Contacts).ThenInclude(x => x.Contact)
@@ -72,14 +67,6 @@ namespace Messenger.Controllers
                 && lastname == null ? true : x.LastName.Contains(lastname!)
                 && phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!);
 
-            //Expression<Func<IQueryable<User>, IOrderedQueryable<User>>>? order =
-            //    orderby == null
-            //    ? null
-            //    : (x) => x.OrderBy(orderby);
-
-            //User[] users = await _provider.GetRepository().Get(filter, order).ToArrayAsync();
-
-            //CreateSelectorExpression<User>(orderby.ToString())
             User[] users = await _context.Users.Where(filter).OrderBy(orderby.ToString()).Skip(pageindex * pagesize).Take(pagesize).Select(x => x).ToArrayAsync();
             return Ok(_provider.ToContactDTO(users));
         }

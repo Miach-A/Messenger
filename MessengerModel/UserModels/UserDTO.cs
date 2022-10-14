@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MessengerModel.ChatModelds;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace MessengerModel.UserModels
 {
     public class UserDTO : UpdateUserDTO
     {
-        public ICollection<UserChats> UserChats { get; set; } = new List<UserChats>();
-        public ICollection<ContactDTO> Contacts { get; set; } = new List<ContactDTO>(); //UserContacts
+        public ICollection<ChatDTO> Chats { get; set; } = new List<ChatDTO>();
+        public ICollection<ContactDTO> Contacts { get; set; } = new List<ContactDTO>();
     }
 }

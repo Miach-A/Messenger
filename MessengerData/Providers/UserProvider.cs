@@ -1,4 +1,5 @@
 ﻿using MessengerModel;
+using MessengerModel.ChatModelds;
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
@@ -129,8 +130,17 @@ namespace MessengerData.Providers
             userDTO.FirstName = user.FirstName;
             userDTO.LastName = user.LastName;
             userDTO.PhoneNumber = user.PhoneNumber;
-            userDTO.UserChats = user.UserChats;
-            //userDTO.Contacts = user.Contacts;
+            foreach (var chat in user.UserChats)
+            {
+                var chatDTO = new ChatDTO{ Guid = chat.ChatGuid, Name = chat.Chat.Name, Public = chat.Chat.Public };
+                foreach (var item in chat.Chat.ChatUsers)
+                {
+                    chatDTO.Users.Add(ToContactDTO(item.User));
+                }
+                                
+                userDTO.Chats.Add(chatDTO);
+            }
+
             foreach (var contact in user.Contacts)
             {
                 userDTO.Contacts.Add(new ContactDTO { Name = contact.Contact.Name, FirstName = contact.Contact.FirstName, LastName = contact.Contact.LastName, PhoneNumber = contact.Contact.PhoneNumber });
@@ -205,7 +215,7 @@ namespace MessengerData.Providers
             
             _context.Chats.Add(chat);
 
-            return await SaveAsync();
+            return  new UpdateResult<Chat>(await SaveAsync()){ Entity = chat };
         }
 
         public async Task<SaveResult> SaveAsync()

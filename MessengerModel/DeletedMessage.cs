@@ -1,4 +1,5 @@
-﻿using MessengerModel.UserModels;
+﻿using MessengerModel.ChatModelds;
+using MessengerModel.UserModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
