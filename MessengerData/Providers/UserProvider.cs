@@ -124,6 +124,25 @@ namespace MessengerData.Providers
             return UpdateContactDTO(user, new ContactDTO());
         }
 
+        public ChatDTO ToChatDTO(Chat chat)
+        {
+            return UpdateChatDTO(chat, new ChatDTO());
+        }
+
+        public ChatDTO UpdateChatDTO(Chat chat, ChatDTO chatDTO)
+        {
+            chatDTO.Guid = chat.Guid;
+            chatDTO.Name = chat.Name;
+            chatDTO.Public = chat.Public;
+
+            foreach (var item in chat.ChatUsers)
+            {
+                chatDTO.Users.Add(ToContactDTO(item.User));
+            }
+
+            return chatDTO;
+        }
+
         public UserDTO UpdateUserDTO (User user, UserDTO userDTO)
         {
             userDTO.Name = user.Name;
@@ -131,19 +150,13 @@ namespace MessengerData.Providers
             userDTO.LastName = user.LastName;
             userDTO.PhoneNumber = user.PhoneNumber;
             foreach (var chat in user.UserChats)
-            {
-                var chatDTO = new ChatDTO{ Guid = chat.ChatGuid, Name = chat.Chat.Name, Public = chat.Chat.Public };
-                foreach (var item in chat.Chat.ChatUsers)
-                {
-                    chatDTO.Users.Add(ToContactDTO(item.User));
-                }
-                                
-                userDTO.Chats.Add(chatDTO);
+            {                             
+                userDTO.Chats.Add(ToChatDTO(chat.Chat));
             }
 
             foreach (var contact in user.Contacts)
             {
-                userDTO.Contacts.Add(new ContactDTO { Name = contact.Contact.Name, FirstName = contact.Contact.FirstName, LastName = contact.Contact.LastName, PhoneNumber = contact.Contact.PhoneNumber });
+                userDTO.Contacts.Add(ToContactDTO(contact.Contact)); //new ContactDTO { Name = contact.Contact.Name, FirstName = contact.Contact.FirstName, LastName = contact.Contact.LastName, PhoneNumber = contact.Contact.PhoneNumber }
             }
 
             return userDTO;
