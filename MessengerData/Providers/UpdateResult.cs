@@ -6,7 +6,7 @@
         {
 
         }
-        public UpdateResult(string errorMessage) : base(errorMessage)
+        public UpdateResult(bool result, string errorMessage) : base(result, errorMessage)
         {
 
         }

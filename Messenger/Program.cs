@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<UserProviderOld>();
+builder.Services.AddScoped<UserProvider>();
 builder.Services.AddScoped<AuthenticateProvider>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

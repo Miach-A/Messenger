@@ -228,22 +228,6 @@ namespace MessengerData.Providers
             return result.Result;
         }
     
-        public async Task<bool> AddChat(Guid userGuid, string contactName)
-        {
-            var user = await _repository.FirstOrDefaultAsync(x => x.Guid == userGuid, null, false);
-            var contact = await _repository.FirstOrDefaultAsync(x => x.Name == contactName,null,false);
-            if (user == null || contact == null)
-            {
-                return false;
-            }
-            
-            var chat = new Chat();
-            chat.Name = string.Concat(user.Name,"-",contact.Name);
-            chat.ChatUsers.Add(new UserChats { Chat = chat, User = user });
-            chat.ChatUsers.Add(new UserChats { Chat = chat, User = contact });
 
-
-            
-        }
     }
 }

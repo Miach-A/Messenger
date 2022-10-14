@@ -6,8 +6,9 @@
         {
 
         }
-        public SaveResult(string errorMessage)
+        public SaveResult(bool result, string errorMessage)
         {
+            Result = result;
             ErrorMessage.Add(errorMessage);
         }
         public bool Result { get; set; } = false;
