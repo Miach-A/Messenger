@@ -9,12 +9,12 @@
         }
         public UpdateResult(string errorMessage) : base(errorMessage)
         {
-            
+
         }
         public UpdateResult(T entity, SaveResult saveResult)
         {
             _entity = entity;
-            _result = saveResult.Result;
+            _result = saveResult;
             ErrorMessage = saveResult.ErrorMessage;
         }
     

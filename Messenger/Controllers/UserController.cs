@@ -79,9 +79,9 @@ namespace Messenger.Controllers
                 return BadRequest();
             }
             var result = await _provider.CreateUserAsync(newUserDTO);
-            if (result.Result)
+            if (result)
             {
-                return StatusCode(201);
+                return StatusCode(201, result.Entity);
             }
             else
             {
@@ -105,7 +105,7 @@ namespace Messenger.Controllers
             }
 
             var result = await _provider.AddContact(userGuid, contactName);
-            if (result.Result)
+            if (result)
             {
                 return StatusCode(200);
             }
@@ -131,7 +131,7 @@ namespace Messenger.Controllers
             }
 
             var result = await _provider.DeleteContact(userGuid, contactName);
-            if (result.Result)
+            if (result)
             {
                 return StatusCode(204);
             }
@@ -157,9 +157,9 @@ namespace Messenger.Controllers
             }
 
             var result = await _provider.UpdateUserAsync(userGuid, updateUserDTO);
-            if (result.Result)
+            if (result)
             {
-                return Ok();
+                return Ok(_provider.ToUserDTO(result.Entity!));
             }
             else
             {
@@ -179,7 +179,7 @@ namespace Messenger.Controllers
             }
 
             var result = await _provider.ChangePasswordAsync(userGuid, password);
-            if (!result.Result)
+            if (!result)
             {
                 return StatusCode(500, result.ErrorMessage);
             }
@@ -203,9 +203,9 @@ namespace Messenger.Controllers
             }
 
             var result = await _provider.AddChat(userGuid, contactName);
-            if (result.Result)
+            if (result)
             {
-                return StatusCode(201, _provider.ToChatDTO(result.Entity));
+                return StatusCode(201, _provider.ToChatDTO(result.Entity!));
             }
             else
             {
