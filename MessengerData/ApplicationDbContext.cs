@@ -3,6 +3,7 @@ using MessengerModel.ChatModelds;
 using MessengerModel.UserModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace MessengerData
 {
@@ -18,7 +19,7 @@ namespace MessengerData
         public DbSet<Chat> Chats { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(_configuration.GetConnectionString("SqlConnectionString"));
+            optionsBuilder.UseSqlServer(_configuration.GetConnectionString("SqlConnectionString")).LogTo(Console.WriteLine, LogLevel.Information); ;
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

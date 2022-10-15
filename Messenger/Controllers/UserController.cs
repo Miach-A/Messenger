@@ -44,7 +44,7 @@ namespace Messenger.Controllers
             }
 
             User? user = await _context.Users
-                .Include(x => x.UserChats).ThenInclude(x => x.Chat)
+                .Include(x => x.UserChats).ThenInclude(x => x.Chat).ThenInclude(x => x.ChatUsers)
                 .Include(x => x.Contacts).ThenInclude(x => x.Contact)
                 .FirstOrDefaultAsync(x => x.Guid == userGuid);
 
@@ -81,7 +81,7 @@ namespace Messenger.Controllers
             var result = await _provider.CreateUserAsync(newUserDTO);
             if (result)
             {
-                return StatusCode(201, result.Entity);
+                return StatusCode(201, _provider.ToUserDTO(result.Entity!));
             }
             else
             {
