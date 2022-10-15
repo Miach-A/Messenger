@@ -50,7 +50,7 @@ namespace MessengerData.Providers
             EntityEntry<User> entry = await _context.Users.AddAsync(user);
 
             var saveResult = await SaveAsync();
-            return new UpdateResult<User>(saveResult){ Entity = entry.Entity };
+            return new UpdateResult<User>(entry.Entity, saveResult);
         }
 
         public async Task<SaveResult> ChangePasswordAsync(Guid userGuid, string password)
@@ -58,28 +58,24 @@ namespace MessengerData.Providers
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Guid == userGuid);
             if (user == null)
             {
-                return new UpdateResult<User>(false, "User provider. Change password. User not found."); //{ Result = false, ErrorMessage = new List<string> { "User provider. Change password. User not found." } };
+                return new UpdateResult<User>("User provider. Change password. User not found.");
             }
 
             var hasher = new PasswordHasher<User>();
             user.PasswordHash = hasher.HashPassword(user, password);
-
             return await SaveAsync(); 
         }
         
         public async Task<UpdateResult<User>> UpdateUserAsync(Guid guid, UpdateUserDTO updateUserDTO)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Guid == guid);
-            var result = new UpdateResult<User> { Result = false };
             if (user == null)
             {
-                result.ErrorMessage.Add("User not found");
-                return new UpdateResult<User>(false, "User provider. Update user. User not found."); //{ Result = false, ErrorMessage = new List<string> { "User provider. Update user. User not found." } };
+                return new UpdateResult<User>("User provider. Update user. User not found.");
             }
 
             UpdateUserProperties(user, updateUserDTO);
-
-            return new UpdateResult<User>(await SaveAsync()) { Entity = user };
+            return new UpdateResult<User>(user, await SaveAsync());
         }
 
         public User UpdateUserProperties(in User user, UpdateUserDTO newUserDTO)
@@ -183,7 +179,7 @@ namespace MessengerData.Providers
                 || contact == null
                 || user.Contacts.Where(x => x.ContactGuid == contact.Guid).Count() > 0)
             {
-                return new SaveResult(false, "User provider. Add contact. User not found or contact is exist.");// { Result = false, ErrorMessage = new List<string> { "User provider. Add contact. User not found or contact is exist." } };
+                return new SaveResult("User provider. Add contact. User not found or contact is exist.");
             }
 
             user.Contacts.Add(new UserContacts() { User = user, Contact = contact, ContactName = contactName });
@@ -199,13 +195,13 @@ namespace MessengerData.Providers
                 .FirstOrDefaultAsync(x => x.Guid == userGuid);
             if (user == null)
             {
-                return new SaveResult(false, "User provider. Delete contact. User not found.");// { Result = false, ErrorMessage = new List<string> { "User provider. Delete contact. User not found." } };
+                return new SaveResult("User provider. Delete contact. User not found.");
             }
 
             var userContactsForDelete = user.Contacts.FirstOrDefault(x => x.Contact.Name == contactName);
             if (userContactsForDelete == null)
             {
-                return new SaveResult(false, "User provider. Delete contact. Contact not found.");
+                return new SaveResult("User provider. Delete contact. Contact not found.");
             }
 
             user.Contacts.Remove(userContactsForDelete);
@@ -218,7 +214,7 @@ namespace MessengerData.Providers
             var contact = await _context.Users.FirstOrDefaultAsync(x => x.Name == contactName);
             if (user == null || contact == null)
             {
-                return new UpdateResult<Chat>(false,"User provider. Add chat. User or contact name not found");
+                return new UpdateResult<Chat>("User provider. Add chat. User or contact name not found");
             }
             
             Chat chat = new Chat();
@@ -228,7 +224,7 @@ namespace MessengerData.Providers
             
             _context.Chats.Add(chat);
 
-            return  new UpdateResult<Chat>(await SaveAsync()){ Entity = chat }; //dd
+            return  new UpdateResult<Chat>(chat, await SaveAsync());
         }
 
         public async Task<SaveResult> SaveAsync()
@@ -236,12 +232,12 @@ namespace MessengerData.Providers
             try
             {
                 await _context.SaveChangesAsync();
-                return new SaveResult { Result = true };
+
+                return new SaveResult().SetResultTrue();
             }
             catch (DbUpdateException exeption)
             {
                 var result = new SaveResult();
-                result.Result = false;
                 if ((exeption.InnerException as SqlException)?.Number == 2601)
                 {
                     result.ErrorMessage.Add("User provider. Save changes. Duplicate field");
@@ -256,7 +252,7 @@ namespace MessengerData.Providers
             }
             catch
             {
-                return new SaveResult(false, "User provider. Save changes. Unhandled exception.");
+                return new SaveResult("User provider. Save changes. Unhandled exception.");
             }
         }
     }

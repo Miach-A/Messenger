@@ -2,16 +2,22 @@
 {
     public class SaveResult
     {
+        protected bool _result = false;
         public SaveResult()
         {
 
         }
-        public SaveResult(bool result, string errorMessage)
+        public SaveResult(string errorMessage)
         {
-            Result = result;
             ErrorMessage.Add(errorMessage);
         }
-        public bool Result { get; set; } = false;
+        public bool Result { get { return _result; } }
         public List<string> ErrorMessage { get; set; } = new List<string>();
+            
+        public SaveResult SetResultTrue()
+        {
+            _result = true;
+            return this;
+        }
     }
 }

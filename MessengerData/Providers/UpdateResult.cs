@@ -2,20 +2,29 @@
 {
     public class UpdateResult<T> : SaveResult where T : class
     {
-        public UpdateResult(T entity) : base()
+        private T? _entity;
+        public UpdateResult() : base()
         {
-            Entity = entity;
+
         }
-        public UpdateResult(T entity, bool result, string errorMessage) : base(result, errorMessage)
+        public UpdateResult(string errorMessage) : base(errorMessage)
         {
-            Entity = entity;
+            
         }
         public UpdateResult(T entity, SaveResult saveResult)
         {
-            Entity = entity;
-            Result = saveResult.Result;
+            _entity = entity;
+            _result = saveResult.Result;
             ErrorMessage = saveResult.ErrorMessage;
         }
-        public T Entity { get; set; } = null!;
+    
+        public T? Entity { get { return _entity; } }
+
+        public UpdateResult<T> SetResultTrue(T entity)
+        {
+            SetResultTrue();
+            _entity = entity;
+            return this;
+        }
     }
 }
