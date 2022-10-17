@@ -1,12 +1,7 @@
 ﻿using MessengerModel.ChatModelds;
 using MessengerModel.UserModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MessengerModel
+namespace MessengerModel.MessageModels
 {
     public class Message
     {

@@ -1,5 +1,6 @@
 ﻿using MessengerModel;
 using MessengerModel.ChatModelds;
+using MessengerModel.MessageModels;
 using MessengerModel.UserModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

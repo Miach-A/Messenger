@@ -1,4 +1,6 @@
-﻿namespace MessengerModel.UserModels
+﻿using MessengerModel.MessageModels;
+
+namespace MessengerModel.UserModels
 {
     public class User
     {

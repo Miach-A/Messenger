@@ -13,8 +13,8 @@ namespace Messenger.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private ApplicationDbContext _context;
-        private UserProvider _provider;
+        private readonly ApplicationDbContext _context;
+        private readonly UserProvider _provider;
         
         public UserController(ApplicationDbContext context, UserProvider provider)
         {
