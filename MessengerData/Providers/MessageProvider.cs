@@ -1,6 +1,7 @@
 ﻿using MessengerData.Extensions;
 using MessengerModel;
 using MessengerModel.MessageModels;
+using MessengerModel.UserModels;
 
 namespace MessengerData.Providers
 {
@@ -38,12 +39,35 @@ namespace MessengerData.Providers
             message.Text = createMessageDTO.Text;
         }
 
-        public MessageDTO UpdateMessageDTO(MessageDTO messageDTO, Message message)
+        public MessageDTO UpdateMessageDTO(Message message, MessageDTO messageDTO)
         {
             messageDTO.Text = message.Text;
             messageDTO.Date = message.Date;
             messageDTO.Guid = message.Guid;
+            messageDTO.ChatGuid = message.ChatGuid;
+            messageDTO.ContactName = message.User.Name;
+            if (message.CommentedMessage != null)
+            {
+                messageDTO.CommentedMessage = ToMessageDTO(message.CommentedMessage.CommentedMessage);
+            }
+            
+            return messageDTO;
+        }
 
+        public MessageDTO ToMessageDTO(Message message)
+        {
+            return UpdateMessageDTO(message, new MessageDTO());
+        }
+
+        public IEnumerable<MessageDTO> ToMessageDTO(IEnumerable<Message> messages)
+        {
+            List<MessageDTO> result = new List<MessageDTO>();
+            foreach (var message in messages)
+            {
+                result.Add(UpdateMessageDTO(message, new MessageDTO()));
+            }
+
+            return result;
         }
 
     }
