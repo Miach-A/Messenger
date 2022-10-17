@@ -38,5 +38,13 @@ namespace MessengerData.Providers
             message.Text = createMessageDTO.Text;
         }
 
+        public MessageDTO UpdateMessageDTO(MessageDTO messageDTO, Message message)
+        {
+            messageDTO.Text = message.Text;
+            messageDTO.Date = message.Date;
+            messageDTO.Guid = message.Guid;
+
+        }
+
     }
 }

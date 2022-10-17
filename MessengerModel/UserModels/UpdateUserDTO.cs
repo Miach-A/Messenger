@@ -9,10 +9,6 @@ namespace MessengerModel.UserModels
 {
     public class UpdateUserDTO
     {
-        [MinLength(3)]
-        [MaxLength(36)]
-        [RegularExpression(@"^[a-zA-Z0-9]+$", ErrorMessage = "only alphabet and numbers")]
-        public string Name { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
