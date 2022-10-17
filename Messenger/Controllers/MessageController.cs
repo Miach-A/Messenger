@@ -3,6 +3,7 @@ using MessengerData;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MessengerModel.MessageModels;
 
 namespace Messenger.Controllers
 {
@@ -18,19 +19,31 @@ namespace Messenger.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetMessage(DateTime date,Guid guid)
-        {
-            var message = await _context.Messages.Include(x => x.MessageComment).FirstOrDefaultAsync(x => x.Date == date && x.Guid == guid);
-            return Ok(message);             
+        //[HttpGet]
+        //public async Task<IActionResult> GetMessage(DateTime date,Guid guid)
+        //{
+        //    var message = await _context.Messages.Include(x => x.CommentedMessage).FirstOrDefaultAsync(x => x.Date == date && x.Guid == guid);
+        //    if (message == null)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    return Ok(_provider.ToMessageDTO(message));             
 
-        }
+        //}
 
         [HttpGet]
         public async Task<IActionResult> Get(DateTime date, Guid chatGuid, int count)
         {
             var message = await _context.Messages.Where(x => x.Date < date && x.ChatGuid == chatGuid).OrderByDescending(x => x.Date).Take(count).ToArrayAsync();
-            return Ok(message);
+            return Ok(_provider.ToMessageDTO(message));
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post(CreateMessageDTO createMessageDTO)
+        {    
+            
+            return Ok(_provider.ToMessageDTO(message));
 
         }
 

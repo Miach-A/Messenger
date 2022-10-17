@@ -3,7 +3,6 @@ using MessengerModel;
 using MessengerModel.ChatModelds;
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Security.Claims;

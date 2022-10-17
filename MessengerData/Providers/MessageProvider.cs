@@ -2,6 +2,7 @@
 using MessengerModel;
 using MessengerModel.MessageModels;
 using MessengerModel.UserModels;
+using System.Security.Claims;
 
 namespace MessengerData.Providers
 {
@@ -13,10 +14,16 @@ namespace MessengerData.Providers
             _context = context;
         }
 
-        public async Task<SaveResult> CreateMessageAsync(CreateMessageDTO createMessageDTO)
+        public async Task<SaveResult> CreateMessageAsync(CreateMessageDTO createMessageDTO, ClaimsPrincipal user)
         {
             Message message = new Message();
-
+            Guid userGuid;
+            if (!_context.GetUserGuid(user, out userGuid))
+            {
+                return new SaveResult("User not found");
+            }
+            message.UserGuid = userGuid;
+            message.Date = DateTime.Now;
             UpdateMessageProperties(message, createMessageDTO);
 
             if (createMessageDTO.CommentedMessageGuid != null)
@@ -33,8 +40,8 @@ namespace MessengerData.Providers
 
         public void UpdateMessageProperties(Message message, CreateMessageDTO createMessageDTO)
         {
-            message.Date = createMessageDTO.Date;
-            message.UserGuid = createMessageDTO.UserGuid;
+            //message.Date = createMessageDTO.Date;
+            //message.UserGuid = createMessageDTO.UserGuid;
             message.ChatGuid = createMessageDTO.ChatGuid;
             message.Text = createMessageDTO.Text;
         }
