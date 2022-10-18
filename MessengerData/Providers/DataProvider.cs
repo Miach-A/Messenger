@@ -67,5 +67,20 @@ namespace MessengerData.Providers
             return true;
         }
 
+        public bool GetClaimValue(ClaimsPrincipal collection, string type, out string claimValue)
+        {
+            claimValue = string.Empty;
+            string? value = collection.FindFirst(x => x.Type == type)?.Value;
+            if (value == null)
+            {
+                return false;
+            }
+            else
+            {
+                claimValue = value;
+                return true;
+            }
+        }
+
     }
 }

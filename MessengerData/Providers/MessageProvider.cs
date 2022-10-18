@@ -10,13 +10,13 @@ namespace MessengerData.Providers
     {
         public MessageProvider(ApplicationDbContext context) : base(context) { }
 
-        public async Task<SaveResult> CreateMessageAsync(CreateMessageDTO createMessageDTO, ClaimsPrincipal user)
+        public async Task<UpdateResult<Message>> CreateMessageAsync(CreateMessageDTO createMessageDTO, ClaimsPrincipal user)
         {
             Message message = new Message();
             Guid userGuid;
             if (!GetUserGuid(user, out userGuid))
             {
-                return new SaveResult("User not found");
+                return new UpdateResult<Message>("User not found");
             }
             message.UserGuid = userGuid;
             message.Date = DateTime.Now;
@@ -30,14 +30,12 @@ namespace MessengerData.Providers
             }
 
             _context.Messages.Add(message);
-            var saveResult =  await SaveAsync("MessageProvider");
+            var saveResult =  await SaveAsync("Message provider.");
             return new UpdateResult<Message>(message, saveResult);
         }
 
         public void UpdateMessageProperties(Message message, CreateMessageDTO createMessageDTO)
         {
-            //message.Date = createMessageDTO.Date;
-            //message.UserGuid = createMessageDTO.UserGuid;
             message.ChatGuid = createMessageDTO.ChatGuid;
             message.Text = createMessageDTO.Text;
         }
@@ -48,7 +46,10 @@ namespace MessengerData.Providers
             messageDTO.Date = message.Date;
             messageDTO.Guid = message.Guid;
             messageDTO.ChatGuid = message.ChatGuid;
-            messageDTO.ContactName = message.User.Name;
+            if (message.User != null)
+            {
+                messageDTO.ContactName = message.User.Name;
+            }     
             if (message.CommentedMessage != null)
             {
                 messageDTO.CommentedMessage = ToMessageDTO(message.CommentedMessage.CommentedMessage);

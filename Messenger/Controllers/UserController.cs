@@ -81,7 +81,7 @@ namespace Messenger.Controllers
             var result = await _provider.CreateUserAsync(newUserDTO);
             if (result)
             {
-                return StatusCode(201, _provider.ToUserDTO(result.Entity!));
+                return StatusCode(201, _provider.ToUserDTO(result.Entity));
             }
             else
             {
@@ -159,7 +159,7 @@ namespace Messenger.Controllers
             var result = await _provider.UpdateUserAsync(userGuid, updateUserDTO);
             if (result)
             {
-                return Ok(_provider.ToUserDTO(result.Entity!));
+                return Ok(_provider.ToUserDTO(result.Entity));
             }
             else
             {
@@ -205,7 +205,7 @@ namespace Messenger.Controllers
             var result = await _provider.AddChat(userGuid, contactName);
             if (result)
             {
-                return StatusCode(201, _provider.ToChatDTO(result.Entity!));
+                return StatusCode(201, _provider.ToChatDTO(result.Entity));
             }
             else
             {

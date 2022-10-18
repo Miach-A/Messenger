@@ -1,8 +1,8 @@
 ﻿namespace MessengerData.Providers
 {
-    public class UpdateResult<T> : SaveResult where T : class
+    public class UpdateResult<T> : SaveResult where T : class , new()
     {
-        private T? _entity;
+        private T _entity = new T();
         public UpdateResult() : base()
         {
 
@@ -18,7 +18,7 @@
             ErrorMessage = saveResult.ErrorMessage;
         }
     
-        public T? Entity { get { return _entity; } }
+        public T Entity { get { return _entity; } }
 
         public UpdateResult<T> SetResultTrue(T entity)
         {

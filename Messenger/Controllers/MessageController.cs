@@ -42,10 +42,13 @@ namespace Messenger.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(CreateMessageDTO createMessageDTO)
         {
+            var result = await _provider.CreateMessageAsync(createMessageDTO, User);
+            if (!result)
+            {
+                return StatusCode(500);                
+            }
 
-            //return Ok(_provider.ToMessageDTO(message));
-            return Ok();
-
+            return Ok(_provider.ToMessageDTO(result.Entity));
         }
 
     }
