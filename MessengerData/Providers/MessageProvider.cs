@@ -6,19 +6,15 @@ using System.Security.Claims;
 
 namespace MessengerData.Providers
 {
-    public class MessageProvider
+    public class MessageProvider : DataProvider
     {
-        private readonly ApplicationDbContext _context;
-        public MessageProvider(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        public MessageProvider(ApplicationDbContext context) : base(context) { }
 
         public async Task<SaveResult> CreateMessageAsync(CreateMessageDTO createMessageDTO, ClaimsPrincipal user)
         {
             Message message = new Message();
             Guid userGuid;
-            if (!_context.GetUserGuid(user, out userGuid))
+            if (!GetUserGuid(user, out userGuid))
             {
                 return new SaveResult("User not found");
             }
@@ -34,7 +30,7 @@ namespace MessengerData.Providers
             }
 
             _context.Messages.Add(message);
-            var saveResult =  await _context.SaveAsync("MessageProvider");
+            var saveResult =  await SaveAsync("MessageProvider");
             return new UpdateResult<Message>(message, saveResult);
         }
 

@@ -2,6 +2,7 @@
 using MessengerModel.Authenticate;
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -64,5 +65,27 @@ namespace MessengerData.Providers
 
             return result;
         }
+
+        public static bool GetUserGuid(ClaimsPrincipal user, out Guid guid)
+        {
+            guid = Guid.Empty;
+            string? userGuidString = user.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userGuidString == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                guid = new Guid(userGuidString);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
     }
 }

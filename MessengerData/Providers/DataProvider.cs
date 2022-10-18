@@ -1,34 +1,23 @@
-﻿using MessengerData.Providers;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.CompilerServices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace MessengerData.Extensions
+namespace MessengerData.Providers
 {
-    public static class DbContextExtentions
+    public class DataProvider
     {
-        public static bool GetUserGuid(this DbContext _context, ClaimsPrincipal user, out Guid guid)
+        protected readonly ApplicationDbContext _context;
+        public DataProvider(ApplicationDbContext context)
         {
-            guid = Guid.Empty;
-            string? userGuidString = user.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (userGuidString == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                guid = new Guid(userGuidString);
-            }
-            catch
-            {
-                return false;
-            }
-
-            return true;
+            _context = context;
         }
-        public static async Task<SaveResult> SaveAsync(this DbContext _context, string providerName)
+
+        public async Task<SaveResult> SaveAsync(string providerName)
         {
             try
             {
@@ -56,5 +45,27 @@ namespace MessengerData.Extensions
                 return new SaveResult(string.Concat(providerName, "Save changes. Unhandled exception."));
             }
         }
+
+        public bool GetUserGuid(ClaimsPrincipal user, out Guid guid)
+        {
+            guid = Guid.Empty;
+            string? userGuidString = user.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userGuidString == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                guid = new Guid(userGuidString);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
     }
 }

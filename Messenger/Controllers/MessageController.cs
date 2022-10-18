@@ -41,9 +41,10 @@ namespace Messenger.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Post(CreateMessageDTO createMessageDTO)
-        {    
-            
-            return Ok(_provider.ToMessageDTO(message));
+        {
+
+            //return Ok(_provider.ToMessageDTO(message));
+            return Ok();
 
         }
 

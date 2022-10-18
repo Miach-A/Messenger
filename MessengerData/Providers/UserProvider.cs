@@ -9,36 +9,10 @@ using System.Security.Claims;
 
 namespace MessengerData.Providers
 {
-    public class UserProvider
+    public class UserProvider : DataProvider
     {
-        private readonly ApplicationDbContext _context;
-
-        public UserProvider(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-        
-        public bool GetUserGuid(ClaimsPrincipal user, out Guid guid)
-        {
-            guid = Guid.Empty;
-            string? userGuidString = user.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (userGuidString == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                guid = new Guid(userGuidString);
-            }
-            catch
-            {
-                return false;
-            }
-
-            return true;
-        }
-
+        public UserProvider(ApplicationDbContext context) : base(context) { }
+   
         public async Task<UpdateResult<User>> CreateUserAsync(CreateUserDTO newUserDTO)
         {
             var hasher = new PasswordHasher<User>();
@@ -50,7 +24,7 @@ namespace MessengerData.Providers
             user.PasswordHash = hasher.HashPassword(user, newUserDTO.Password);
             EntityEntry<User> entry = await _context.Users.AddAsync(user);
 
-            var saveResult = await _context.SaveAsync("User provider");
+            var saveResult = await SaveAsync("User provider");
             return new UpdateResult<User>(entry.Entity, saveResult);
         }
 
@@ -64,7 +38,7 @@ namespace MessengerData.Providers
 
             var hasher = new PasswordHasher<User>();
             user.PasswordHash = hasher.HashPassword(user, password);
-            return await _context.SaveAsync("User provider"); 
+            return await SaveAsync("User provider"); 
         }
         
         public async Task<UpdateResult<User>> UpdateUserAsync(Guid guid, UpdateUserDTO updateUserDTO)
@@ -76,7 +50,7 @@ namespace MessengerData.Providers
             }
 
             UpdateUserProperties(user, updateUserDTO);
-            return new UpdateResult<User>(user, await _context.SaveAsync("User provider"));
+            return new UpdateResult<User>(user, await SaveAsync("User provider"));
         }
 
         public User UpdateUserProperties(in User user, UpdateUserDTO newUserDTO)
@@ -185,7 +159,7 @@ namespace MessengerData.Providers
 
             user.Contacts.Add(new UserContacts() { User = user, Contact = contact, ContactName = contactName });
     
-            return await _context.SaveAsync("User provider");
+            return await SaveAsync("User provider");
         }    
 
         public async Task<SaveResult> DeleteContact(Guid userGuid, string contactName)
@@ -206,7 +180,7 @@ namespace MessengerData.Providers
             }
 
             user.Contacts.Remove(userContactsForDelete);
-            return await _context.SaveAsync("User provider");
+            return await SaveAsync("User provider");
         }
     
         public async Task<UpdateResult<Chat>> AddChat(Guid userGuid, string contactName)
@@ -225,7 +199,7 @@ namespace MessengerData.Providers
             
             _context.Chats.Add(chat);
 
-            return  new UpdateResult<Chat>(chat, await _context.SaveAsync("User provider"));
+            return  new UpdateResult<Chat>(chat, await SaveAsync("User provider"));
         }
     }
 }
