@@ -26,12 +26,12 @@ namespace MessengerData.Providers
             if (createMessageDTO.CommentedMessageGuid != null 
                 && createMessageDTO.CommentedMessageDate != null)
             {
-                var commentedMessage = await _context.Messages.FirstOrDefaultAsync(x => x.Date == createMessageDTO.CommentedMessageDate && x.Guid == createMessageDTO.CommentedMessageGuid);
+                var commentedMessage = await _context.Messages.Include(x => x.User)
+                    .FirstOrDefaultAsync(x => x.Date == createMessageDTO.CommentedMessageDate 
+                                            && x.Guid == createMessageDTO.CommentedMessageGuid);
                 if (commentedMessage != null)
                 {
                     MessageComment messageComment = new MessageComment();
-                    //messageComment.CommentedMessageDate = (DateTime)createMessageDTO.CommentedMessageDate;
-                    //messageComment.CommentedMessageGuid = (Guid)createMessageDTO.CommentedMessageGuid;
                     messageComment.CommentedMessage = commentedMessage;
                     messageComment.Message = message;
                     message.CommentedMessage = messageComment;
@@ -50,7 +50,10 @@ namespace MessengerData.Providers
                 return new UpdateResult<Message>("User not found");
             }
 
-            var message = _context.Messages.FirstOrDefault(x => x.Date == updateMessageDTO.Date && x.Guid == updateMessageDTO.Guid && x.UserGuid == userGuid);
+            var message = _context.Messages
+                .FirstOrDefault(x => x.Date == updateMessageDTO.Date 
+                                    && x.Guid == updateMessageDTO.Guid 
+                                    && x.UserGuid == userGuid);
             if (message == null)
             {
                 return new UpdateResult<Message>("Message not found");
