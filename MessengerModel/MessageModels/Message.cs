@@ -12,6 +12,6 @@ namespace MessengerModel.MessageModels
         public User User { get; set; } = null!;
         public Guid UserGuid { get; set; }
         public string Text { get; set; } = string.Empty;
-        public MessageComment? CommentedMessage { get; set; }   //
+        public MessageComment? CommentedMessage { get; set; }  
     }
 }

@@ -51,5 +51,16 @@ namespace Messenger.Controllers
             return Ok(_provider.ToMessageDTO(result.Entity));
         }
 
+        [HttpPut]
+        public async Task<IActionResult> Put(UpdateMessageDTO updateMessageDTO)
+        {
+            var result = await _provider.CreateMessageAsync(updateMessageDTO, User);
+            if (!result)
+            {
+                return StatusCode(500);
+            }
+
+            return Ok(_provider.ToMessageDTO(result.Entity));
+        }
     }
 }

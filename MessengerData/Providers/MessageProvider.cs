@@ -34,6 +34,16 @@ namespace MessengerData.Providers
             return new UpdateResult<Message>(message, saveResult);
         }
 
+        public async Task<UpdateResult<Message>> UpdateMessageAsync(UpdateMessageDTO updateMessageDTO, ClaimsPrincipal user)
+        {
+            Guid userGuid;
+            if (!GetUserGuid(user, out userGuid))
+            {
+                return new UpdateResult<Message>("User not found");
+            }
+
+        }
+
         public void UpdateMessageProperties(Message message, CreateMessageDTO createMessageDTO)
         {
             message.ChatGuid = createMessageDTO.ChatGuid;
