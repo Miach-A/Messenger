@@ -2,6 +2,7 @@
 using MessengerModel;
 using MessengerModel.MessageModels;
 using MessengerModel.UserModels;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace MessengerData.Providers
@@ -11,22 +12,25 @@ namespace MessengerData.Providers
         public MessageProvider(ApplicationDbContext context) : base(context) { }
 
         public async Task<UpdateResult<Message>> CreateMessageAsync(CreateMessageDTO createMessageDTO, ClaimsPrincipal user)
-        {
-            Message message = new Message();
-            Guid userGuid;
-            if (!GetUserGuid(user, out userGuid))
+        {          
+            if (!GetUserGuid(user, out var userGuid))
             {
                 return new UpdateResult<Message>("User not found");
             }
+
+            Message message = new Message();
             message.UserGuid = userGuid;
             message.Date = DateTime.Now;
             UpdateMessageProperties(message, createMessageDTO);
 
-            if (createMessageDTO.CommentedMessageGuid != null)
+            if (createMessageDTO.CommentedMessageGuid != null 
+                && createMessageDTO.CommentedMessageDate != null)
             {
                 MessageComment messageComment = new MessageComment();
+                messageComment.CommentedMessageDate = (DateTime)createMessageDTO.CommentedMessageDate;
                 messageComment.CommentedMessageGuid = (Guid)createMessageDTO.CommentedMessageGuid;
                 messageComment.Message = message;
+                message.CommentedMessage = messageComment;
             }
 
             _context.Messages.Add(message);
@@ -36,12 +40,20 @@ namespace MessengerData.Providers
 
         public async Task<UpdateResult<Message>> UpdateMessageAsync(UpdateMessageDTO updateMessageDTO, ClaimsPrincipal user)
         {
-            Guid userGuid;
-            if (!GetUserGuid(user, out userGuid))
+            if (!GetUserGuid(user, out var userGuid))
             {
                 return new UpdateResult<Message>("User not found");
             }
 
+            var message = _context.Messages.FirstOrDefault(x => x.Date == updateMessageDTO.Date && x.Guid == updateMessageDTO.Guid && x.UserGuid == userGuid);
+            if (message == null)
+            {
+                return new UpdateResult<Message>("Message not found");
+            }
+
+            message.Text = updateMessageDTO.Text;
+            var saveResult = await SaveAsync("Message provider.");
+            return new UpdateResult<Message>(message, saveResult);
         }
 
         public void UpdateMessageProperties(Message message, CreateMessageDTO createMessageDTO)

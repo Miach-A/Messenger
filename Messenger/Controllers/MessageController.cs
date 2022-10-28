@@ -54,7 +54,7 @@ namespace Messenger.Controllers
         [HttpPut]
         public async Task<IActionResult> Put(UpdateMessageDTO updateMessageDTO)
         {
-            var result = await _provider.CreateMessageAsync(updateMessageDTO, User);
+            var result = await _provider.UpdateMessageAsync(updateMessageDTO, User);
             if (!result)
             {
                 return StatusCode(500);
