@@ -26,11 +26,16 @@ namespace MessengerData.Providers
             if (createMessageDTO.CommentedMessageGuid != null 
                 && createMessageDTO.CommentedMessageDate != null)
             {
-                MessageComment messageComment = new MessageComment();
-                messageComment.CommentedMessageDate = (DateTime)createMessageDTO.CommentedMessageDate;
-                messageComment.CommentedMessageGuid = (Guid)createMessageDTO.CommentedMessageGuid;
-                messageComment.Message = message;
-                message.CommentedMessage = messageComment;
+                var commentedMessage = await _context.Messages.FirstOrDefaultAsync(x => x.Date == createMessageDTO.CommentedMessageDate && x.Guid == createMessageDTO.CommentedMessageGuid);
+                if (commentedMessage != null)
+                {
+                    MessageComment messageComment = new MessageComment();
+                    //messageComment.CommentedMessageDate = (DateTime)createMessageDTO.CommentedMessageDate;
+                    //messageComment.CommentedMessageGuid = (Guid)createMessageDTO.CommentedMessageGuid;
+                    messageComment.CommentedMessage = commentedMessage;
+                    messageComment.Message = message;
+                    message.CommentedMessage = messageComment;
+                }
             }
 
             _context.Messages.Add(message);
