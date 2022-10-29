@@ -6,6 +6,7 @@ using MessengerData.Extensions;
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Authorization;
 using MessengerData;
+using System.Xml.Linq;
 
 namespace Messenger.Controllers
 {
@@ -82,7 +83,7 @@ namespace Messenger.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Name == newUserDTO.Name);
             if (user != null)
             {
-                return StatusCode(500, "User with this name exists");
+                return StatusCode(500, new { errors = new { Name = "User with this name exists"}});
             }
 
             var result = await _provider.CreateUserAsync(newUserDTO);
