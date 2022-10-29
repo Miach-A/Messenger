@@ -78,6 +78,13 @@ namespace Messenger.Controllers
             {
                 return BadRequest();
             }
+
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Name == newUserDTO.Name);
+            if (user != null)
+            {
+                return StatusCode(500, "User with this name exists");
+            }
+
             var result = await _provider.CreateUserAsync(newUserDTO);
             if (result)
             {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MessengerModel.UserModels
 {
-    public class CreateUserDTO : UpdateUserDTO
+    public class CreateUserDTO //: UpdateUserDTO
     {
         [MinLength(3)]
         [MaxLength(36)]
