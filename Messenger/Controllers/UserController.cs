@@ -62,7 +62,7 @@ namespace Messenger.Controllers
         public async Task<IActionResult> GetUsers(string? name, string? firstname, string? lastname, string? phonenumber, UserOrderBy orderby = UserOrderBy.Name, int pageindex = 0, int pagesize = 20)
         {
             Expression<Func<User, bool>> filter = (x) =>
-                name == null ? true : x.Name.Contains(name)
+                name == null ? true : x.Name.Contains(name.ToLowerInvariant())
                 && firstname == null ? true : x.FirstName.Contains(firstname!)
                 && lastname == null ? true : x.LastName.Contains(lastname!)
                 && phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!);
