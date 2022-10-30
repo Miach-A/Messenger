@@ -38,14 +38,13 @@ namespace Messenger.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            Guid userGuid;
-            if (!_provider.GetUserGuid(User, out userGuid))
+            if (!_provider.GetUserGuid(User, out var userGuid))
             {
                 return StatusCode(500);
             }
 
             User? user = await _context.Users
-                .Include(x => x.UserChats).ThenInclude(x => x.Chat).ThenInclude(x => x.ChatUsers)
+                .Include(x => x.UserChats).ThenInclude(x => x.Chat).ThenInclude(x => x.ChatUsers).ThenInclude(x => x.User)
                 .Include(x => x.Contacts).ThenInclude(x => x.Contact)
                 .FirstOrDefaultAsync(x => x.Guid == userGuid);
 
@@ -80,10 +79,10 @@ namespace Messenger.Controllers
                 return BadRequest();
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Name == newUserDTO.Name);
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Name == newUserDTO.Name.ToLowerInvariant());
             if (user != null)
             {
-                return StatusCode(500, new { errors = new { Name = "User with this name exists"}});
+                return BadRequest(new { errors = new { Name = new string[] { "User with this name exists" }}});
             }
 
             var result = await _provider.CreateUserAsync(newUserDTO);
@@ -106,8 +105,7 @@ namespace Messenger.Controllers
                 return BadRequest();
             }
 
-            Guid userGuid;
-            if (!_provider.GetUserGuid(User, out userGuid))
+            if (!_provider.GetUserGuid(User, out var userGuid))
             {
                 return StatusCode(500);
             }
@@ -132,8 +130,7 @@ namespace Messenger.Controllers
                 return BadRequest();
             }
 
-            Guid userGuid;
-            if (!_provider.GetUserGuid(User, out userGuid))
+            if (!_provider.GetUserGuid(User, out var userGuid))
             {
                 return StatusCode(500);
             }
@@ -153,8 +150,7 @@ namespace Messenger.Controllers
         [HttpPut]
         public async Task<IActionResult> Put([FromBody] UpdateUserDTO updateUserDTO)
         {
-            Guid userGuid;
-            if (!_provider.GetUserGuid(User, out userGuid))
+            if (!_provider.GetUserGuid(User, out var userGuid))
             {
                 return StatusCode(500);
             }
@@ -180,8 +176,7 @@ namespace Messenger.Controllers
         [ActionName("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] string password)
         {
-            Guid userGuid;
-            if (!_provider.GetUserGuid(User, out userGuid))
+            if (!_provider.GetUserGuid(User, out var userGuid))
             {
                 return StatusCode(500);
             }
@@ -204,8 +199,7 @@ namespace Messenger.Controllers
                 return BadRequest();
             }
 
-            Guid userGuid;
-            if (!_provider.GetUserGuid(User, out userGuid))
+            if (!_provider.GetUserGuid(User, out var userGuid))
             {
                 return StatusCode(500);
             }

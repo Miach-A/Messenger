@@ -17,7 +17,7 @@ namespace MessengerData.Providers
             var user = new User();
 
             //UpdateUserProperties(user, newUserDTO);
-            user.Name = newUserDTO.Name;
+            user.Name = newUserDTO.Name.ToLowerInvariant();
             user.PasswordHash = hasher.HashPassword(user, newUserDTO.Password);
             EntityEntry<User> entry = await _context.Users.AddAsync(user);
 
