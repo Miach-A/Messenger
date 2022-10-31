@@ -62,13 +62,15 @@ namespace Messenger.Controllers
         public async Task<IActionResult> GetUsers(string? name, string? firstname, string? lastname, string? phonenumber, UserOrderBy orderby = UserOrderBy.Name, int pageindex = 0, int pagesize = 20)
         {
             Expression<Func<User, bool>> filter = (x) =>
-                name == null ? true : x.Name.Contains(name.ToLowerInvariant())
-                && firstname == null ? true : x.FirstName.Contains(firstname!)
-                && lastname == null ? true : x.LastName.Contains(lastname!)
-                && phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!);
+                ((name == null ? true : x.Name.Contains(name.ToLower()))
+                && (firstname == null ? true : x.FirstName.ToLower().Contains(firstname!.ToLower()))
+                && (lastname == null ? true : x.LastName.ToLower().Contains(lastname!.ToLower()))
+                && (phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!)));
 
+            var TotalCount = _context.Users.Where(filter).Count();
             User[] users = await _context.Users.Where(filter).OrderBy(orderby.ToString()).Skip(pageindex * pagesize).Take(pagesize).Select(x => x).ToArrayAsync();
-            return Ok(_provider.ToContactDTO(users));
+
+            return Ok(new {Contacts = _provider.ToContactDTO(users) , TotalCount = TotalCount});
         }
 
         [HttpPost]
