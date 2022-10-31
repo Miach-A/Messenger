@@ -1,11 +1,7 @@
-﻿using MessengerModel.UserModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MessengerModel.ChatModelds;
+using MessengerModel.UserModels;
 
-namespace MessengerModel
+namespace MessengerModel.MessageModels
 {
     public class Message
     {
@@ -16,6 +12,6 @@ namespace MessengerModel
         public User User { get; set; } = null!;
         public Guid UserGuid { get; set; }
         public string Text { get; set; } = string.Empty;
-        public ICollection<MessageComment> MessageComment { get; set; } = new List<MessageComment>();
+        public MessageComment? CommentedMessage { get; set; }  
     }
 }

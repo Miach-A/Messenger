@@ -5,8 +5,8 @@ using System.Linq.Expressions;
 using MessengerData.Extensions;
 using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Authorization;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using MessengerData;
+using System.Xml.Linq;
 
 namespace Messenger.Controllers
 {
@@ -14,58 +14,61 @@ namespace Messenger.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private UserProvider _provider;
-        public UserController(UserProvider provider)
+        private readonly ApplicationDbContext _context;
+        private readonly UserProvider _provider;
+        
+        public UserController(ApplicationDbContext context, UserProvider provider)
         {
             _provider = provider;
+            _context = context;
+        }
+
+        [HttpGet("~/api/test")]
+        public IActionResult GetTest()
+        {
+            //var user = _provider.GetRepository().Get(null, null,
+            //    x => x
+            //        .Include(y => y.Contacts).ThenInclude(y => y.Contact)
+            //        .Include(y => y.IAsContact).ThenInclude(y => y.User))
+            //    .ToArray();
+            return Ok();
         }
 
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-
-            Guid userGuid;
-            if (!_provider.GetUserGuid(User, out userGuid))
+            if (!_provider.GetUserGuid(User, out var userGuid))
             {
                 return StatusCode(500);
             }
 
-            User? user = await _provider.GetRepository()
-                .FirstOrDefaultAsync(x => x.Guid == userGuid
-                , x => x.Include(y => y.UserChats)
-                        .Include(y => y.Contacts));
-               
+            User? user = await _context.Users
+                .Include(x => x.UserChats).ThenInclude(x => x.Chat).ThenInclude(x => x.ChatUsers).ThenInclude(x => x.User)
+                .Include(x => x.Contacts).ThenInclude(x => x.Contact)
+                .FirstOrDefaultAsync(x => x.Guid == userGuid);
+
             if (user == null)
             {
                 return StatusCode(500);
             }
 
             return Ok(_provider.ToUserDTO(user));
-        
         }
 
         [Authorize]
-        [HttpGet("~/api/GetContacts")]
-        [ActionName("GetContacts")]
-        public async Task<IActionResult> GetContacts(string? name, string? firstname, string? lastname, string? phonenumber,string? orderby, int pageindex = 0, int pagesize = 20)
+        [HttpGet("~/api/GetUsers")]
+        [ActionName("GetUsers")]
+        public async Task<IActionResult> GetUsers(string? name, string? firstname, string? lastname, string? phonenumber, UserOrderBy orderby = UserOrderBy.Name, int pageindex = 0, int pagesize = 20)
         {
-
-            Expression<Func<User, bool>> filter = (x) =>      
-                name == null ? true : x.Name.Contains(name)
+            Expression<Func<User, bool>> filter = (x) =>
+                name == null ? true : x.Name.Contains(name.ToLowerInvariant())
                 && firstname == null ? true : x.FirstName.Contains(firstname!)
                 && lastname == null ? true : x.LastName.Contains(lastname!)
                 && phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!);
 
-            Func<IQueryable<User>, IOrderedQueryable<User>>? order = 
-                orderby == null 
-                ? null 
-                : (x) => x.OrderBy(orderby);
-
-            User[] users = await _provider.GetRepository().Get(filter, order).ToArrayAsync();
-
+            User[] users = await _context.Users.Where(filter).OrderBy(orderby.ToString()).Skip(pageindex * pagesize).Take(pagesize).Select(x => x).ToArrayAsync();
             return Ok(_provider.ToContactDTO(users));
-
         }
 
         [HttpPost]
@@ -75,10 +78,67 @@ namespace Messenger.Controllers
             {
                 return BadRequest();
             }
-            var result = await _provider.CreateUserAsync(newUserDTO);
-            if (result.Result)
+
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Name == newUserDTO.Name.ToLowerInvariant());
+            if (user != null)
             {
-                return StatusCode(201);
+                return BadRequest(new { errors = new { Name = new string[] { "User with this name exists" }}});
+            }
+
+            var result = await _provider.CreateUserAsync(newUserDTO);
+            if (result)
+            {
+                return StatusCode(201, _provider.ToUserDTO(result.Entity));
+            }
+            else
+            {
+                return StatusCode(500, result.ErrorMessage);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("~/api/PostContact/")]
+        public async Task<IActionResult> PostContact([FromBody] string contactName)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            if (!_provider.GetUserGuid(User, out var userGuid))
+            {
+                return StatusCode(500);
+            }
+
+            var result = await _provider.AddContact(userGuid, contactName);
+            if (result)
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(500, result.ErrorMessage);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("~/api/DeleteContact/")]
+        public async Task<IActionResult> DeleteContact([FromBody] string contactName)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            if (!_provider.GetUserGuid(User, out var userGuid))
+            {
+                return StatusCode(500);
+            }
+
+            var result = await _provider.DeleteContact(userGuid, contactName);
+            if (result)
+            {
+                return StatusCode(204);
             }
             else
             {
@@ -90,8 +150,7 @@ namespace Messenger.Controllers
         [HttpPut]
         public async Task<IActionResult> Put([FromBody] UpdateUserDTO updateUserDTO)
         {
-            Guid userGuid;
-            if (!_provider.GetUserGuid(User, out userGuid))
+            if (!_provider.GetUserGuid(User, out var userGuid))
             {
                 return StatusCode(500);
             }
@@ -102,15 +161,14 @@ namespace Messenger.Controllers
             }
 
             var result = await _provider.UpdateUserAsync(userGuid, updateUserDTO);
-            if (result.Result)
+            if (result)
             {
-                return Ok();
+                return Ok(_provider.ToUserDTO(result.Entity));
             }
             else
             {
                 return StatusCode(500, result.ErrorMessage);
             }
-
         }
 
         [Authorize]
@@ -118,9 +176,7 @@ namespace Messenger.Controllers
         [ActionName("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] string password)
         {
-
-            Guid userGuid;
-            if (!_provider.GetUserGuid(User, out userGuid))
+            if (!_provider.GetUserGuid(User, out var userGuid))
             {
                 return StatusCode(500);
             }
@@ -128,12 +184,44 @@ namespace Messenger.Controllers
             var result = await _provider.ChangePasswordAsync(userGuid, password);
             if (!result)
             {
-                return StatusCode(500);
+                return StatusCode(500, result.ErrorMessage);
             }
 
             return Ok();
+        }
 
-        } 
+        [Authorize]
+        [HttpPost("~/api/PostChat/")]
+        public async Task<IActionResult> PostChat([FromBody] string contactName)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            if (!_provider.GetUserGuid(User, out var userGuid))
+            {
+                return StatusCode(500);
+            }
+
+            var result = await _provider.AddChat(userGuid, contactName);
+            if (result)
+            {
+                return StatusCode(201, _provider.ToChatDTO(result.Entity));
+            }
+            else
+            {
+                return StatusCode(500, result.ErrorMessage);
+            }
+        }
+
+        public enum UserOrderBy
+        {
+            Name,
+            FirstName,
+            LastName,
+            PhoneNumber
+        }
 
     }
 }

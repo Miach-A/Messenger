@@ -9,8 +9,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>();
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+//builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<UserProvider>();
+builder.Services.AddScoped<MessageProvider>();
 builder.Services.AddScoped<AuthenticateProvider>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -74,6 +75,17 @@ builder.Services.AddAuthentication("OAuth")
         };
     });
 
+builder.Services.AddCors(option => {
+    option.AddDefaultPolicy(builder =>
+        builder
+        //.AllowAnyOrigin()
+        .WithOrigins(new string[] { "http://localhost:4200", "https://localhost:4200" })
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+         );
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -83,6 +95,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();

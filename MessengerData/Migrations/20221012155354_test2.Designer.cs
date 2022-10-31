@@ -4,6 +4,7 @@ using MessengerData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MessengerData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221012155354_test2")]
+    partial class test2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +24,7 @@ namespace MessengerData.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("MessengerModel.ChatModelds.Chat", b =>
+            modelBuilder.Entity("MessengerModel.Chat", b =>
                 {
                     b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
@@ -63,28 +65,7 @@ namespace MessengerData.Migrations
                     b.ToTable("DeletedMessage");
                 });
 
-            modelBuilder.Entity("MessengerModel.MessageComment", b =>
-                {
-                    b.Property<DateTime>("MessageDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("MessageGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CommentedMessageDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CommentedMessageGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("MessageDate", "MessageGuid");
-
-                    b.HasIndex("CommentedMessageDate", "CommentedMessageGuid");
-
-                    b.ToTable("MessageComment");
-                });
-
-            modelBuilder.Entity("MessengerModel.MessageModels.Message", b =>
+            modelBuilder.Entity("MessengerModel.Message", b =>
                 {
                     b.Property<DateTime>("Date")
                         .ValueGeneratedOnAdd()
@@ -112,6 +93,30 @@ namespace MessengerData.Migrations
                     b.HasIndex("UserGuid");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("MessengerModel.MessageComment", b =>
+                {
+                    b.Property<DateTime>("MessageDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("MessageGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CommentedMessageDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CommentedMessageGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("MessageDate", "MessageGuid", "CommentedMessageDate", "CommentedMessageGuid");
+
+                    b.HasIndex("CommentedMessageDate", "CommentedMessageGuid");
+
+                    b.HasIndex("MessageDate", "MessageGuid")
+                        .IsUnique();
+
+                    b.ToTable("MessageComment");
                 });
 
             modelBuilder.Entity("MessengerModel.UserChats", b =>
@@ -186,7 +191,7 @@ namespace MessengerData.Migrations
 
             modelBuilder.Entity("MessengerModel.DeletedMessage", b =>
                 {
-                    b.HasOne("MessengerModel.ChatModelds.Chat", "Chat")
+                    b.HasOne("MessengerModel.Chat", "Chat")
                         .WithMany("DeletedMessages")
                         .HasForeignKey("ChatGuid")
                         .OnDelete(DeleteBehavior.ClientCascade)
@@ -198,7 +203,7 @@ namespace MessengerData.Migrations
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.HasOne("MessengerModel.MessageModels.Message", "Message")
+                    b.HasOne("MessengerModel.Message", "Message")
                         .WithMany()
                         .HasForeignKey("Date", "MessageGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -211,28 +216,9 @@ namespace MessengerData.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MessengerModel.MessageComment", b =>
+            modelBuilder.Entity("MessengerModel.Message", b =>
                 {
-                    b.HasOne("MessengerModel.MessageModels.Message", "CommentedMessage")
-                        .WithMany()
-                        .HasForeignKey("CommentedMessageDate", "CommentedMessageGuid")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
-                    b.HasOne("MessengerModel.MessageModels.Message", "Message")
-                        .WithOne("MessageComment")
-                        .HasForeignKey("MessengerModel.MessageComment", "MessageDate", "MessageGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CommentedMessage");
-
-                    b.Navigation("Message");
-                });
-
-            modelBuilder.Entity("MessengerModel.MessageModels.Message", b =>
-                {
-                    b.HasOne("MessengerModel.ChatModelds.Chat", "Chat")
+                    b.HasOne("MessengerModel.Chat", "Chat")
                         .WithMany("Messages")
                         .HasForeignKey("ChatGuid")
                         .OnDelete(DeleteBehavior.ClientCascade)
@@ -249,9 +235,28 @@ namespace MessengerData.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MessengerModel.MessageComment", b =>
+                {
+                    b.HasOne("MessengerModel.Message", "CommentedMessage")
+                        .WithMany("MessageComment")
+                        .HasForeignKey("CommentedMessageDate", "CommentedMessageGuid")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("MessengerModel.Message", "Message")
+                        .WithOne()
+                        .HasForeignKey("MessengerModel.MessageComment", "MessageDate", "MessageGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CommentedMessage");
+
+                    b.Navigation("Message");
+                });
+
             modelBuilder.Entity("MessengerModel.UserChats", b =>
                 {
-                    b.HasOne("MessengerModel.ChatModelds.Chat", "Chat")
+                    b.HasOne("MessengerModel.Chat", "Chat")
                         .WithMany("ChatUsers")
                         .HasForeignKey("ChatGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -271,9 +276,9 @@ namespace MessengerData.Migrations
             modelBuilder.Entity("MessengerModel.UserContacts", b =>
                 {
                     b.HasOne("MessengerModel.UserModels.User", "Contact")
-                        .WithMany("IAsContact")
+                        .WithMany()
                         .HasForeignKey("ContactGuid")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MessengerModel.UserModels.User", "User")
@@ -287,7 +292,7 @@ namespace MessengerData.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MessengerModel.ChatModelds.Chat", b =>
+            modelBuilder.Entity("MessengerModel.Chat", b =>
                 {
                     b.Navigation("ChatUsers");
 
@@ -296,7 +301,7 @@ namespace MessengerData.Migrations
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("MessengerModel.MessageModels.Message", b =>
+            modelBuilder.Entity("MessengerModel.Message", b =>
                 {
                     b.Navigation("MessageComment");
                 });
@@ -306,8 +311,6 @@ namespace MessengerData.Migrations
                     b.Navigation("Contacts");
 
                     b.Navigation("DeletedMessages");
-
-                    b.Navigation("IAsContact");
 
                     b.Navigation("Messages");
 

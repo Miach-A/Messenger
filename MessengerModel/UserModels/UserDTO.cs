@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MessengerModel.ChatModelds;
 
 namespace MessengerModel.UserModels
 {
     public class UserDTO : UpdateUserDTO
     {
-        public ICollection<UserChats> UserChats { get; set; } = new List<UserChats>();
-        public ICollection<UserContacts> Contacts { get; set; } = new List<UserContacts>();
+        public string Name { get; set; } = string.Empty;
+        public ICollection<ChatDTO> Chats { get; set; } = new List<ChatDTO>();
+        public ICollection<ContactDTO> Contacts { get; set; } = new List<ContactDTO>();
     }
 }
