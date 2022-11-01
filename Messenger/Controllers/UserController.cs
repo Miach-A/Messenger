@@ -59,13 +59,19 @@ namespace Messenger.Controllers
         [Authorize]
         [HttpGet("~/api/GetUsers")]
         [ActionName("GetUsers")]
-        public async Task<IActionResult> GetUsers(string? name, string? firstname, string? lastname, string? phonenumber, UserOrderBy orderby = UserOrderBy.Name, int pageindex = 0, int pagesize = 20)
+        public async Task<IActionResult> GetUsers(string name, UserOrderBy orderby = UserOrderBy.Name, int pageindex = 0, int pagesize = 20) //string? firstname, string? lastname, string? phonenumber
         {
+            //Expression<Func<User, bool>> filter = (x) =>
+            //    ((name == null ? true : x.Name.Contains(name.ToLower()))
+            //    && (firstname == null ? true : x.FirstName.ToLower().Contains(firstname!.ToLower()))
+            //    && (lastname == null ? true : x.LastName.ToLower().Contains(lastname!.ToLower()))
+            //    && (phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!)));
+
+            var nameSearch = name.ToLower();
             Expression<Func<User, bool>> filter = (x) =>
-                ((name == null ? true : x.Name.Contains(name.ToLower()))
-                && (firstname == null ? true : x.FirstName.ToLower().Contains(firstname!.ToLower()))
-                && (lastname == null ? true : x.LastName.ToLower().Contains(lastname!.ToLower()))
-                && (phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!)));
+                x.Name.Contains(nameSearch)
+                || x.FirstName.ToLower().Contains(nameSearch)
+                || x.LastName.ToLower().Contains(nameSearch);
 
             var TotalCount = _context.Users.Where(filter).Count();
             User[] users = await _context.Users.Where(filter).OrderBy(orderby.ToString()).Skip(pageindex * pagesize).Take(pagesize).Select(x => x).ToArrayAsync();
