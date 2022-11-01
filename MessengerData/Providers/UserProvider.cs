@@ -139,7 +139,7 @@ namespace MessengerData.Providers
             return contactDTO;
         }
     
-        public async Task<SaveResult> AddContact(Guid userGuid, string contactName)
+        public async Task<UpdateResult<ContactDTO>> AddContact(Guid userGuid, string contactName)
         {
             var user = await _context.Users
                 .Include(x => x.Contacts).ThenInclude(x => x.Contact)
@@ -150,12 +150,12 @@ namespace MessengerData.Providers
                 || contact == null
                 || user.Contacts.Where(x => x.ContactGuid == contact.Guid).Count() > 0)
             {
-                return new SaveResult("User provider. Add contact. User not found or contact is exist.");
+                return new UpdateResult<ContactDTO>("User provider. Add contact. User not found or contact is exist.");
             }
 
             user.Contacts.Add(new UserContacts() { User = user, Contact = contact, ContactName = contactName });
     
-            return await SaveAsync("User provider. ");
+            return new UpdateResult<ContactDTO> (ToContactDTO(contact), await SaveAsync("User provider. "));
         }    
 
         public async Task<SaveResult> DeleteContact(Guid userGuid, string contactName)
