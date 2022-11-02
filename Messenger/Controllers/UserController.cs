@@ -131,7 +131,7 @@ namespace Messenger.Controllers
 
         [Authorize]
         [HttpDelete("~/api/DeleteContact/")]
-        public async Task<IActionResult> DeleteContact([FromBody] string contactName)
+        public async Task<IActionResult> DeleteContact([FromBody] CreateContactDTO createContactDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -143,7 +143,7 @@ namespace Messenger.Controllers
                 return StatusCode(500);
             }
 
-            var result = await _provider.DeleteContact(userGuid, contactName);
+            var result = await _provider.DeleteContact(userGuid, createContactDTO.Name);
             if (result)
             {
                 return StatusCode(204);
