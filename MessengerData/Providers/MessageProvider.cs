@@ -125,5 +125,7 @@ namespace MessengerData.Providers
             _context.Remove(message);
             return await SaveAsync("Message provider. ");
         }
+
+        //public async Task<SaveResult> 
     }
 }
