@@ -70,7 +70,7 @@ namespace MessengerData.Providers
             }
 
             message.Text = updateMessageDTO.Text;
-            var saveResult = await SaveAsync("Message provider.");
+            var saveResult = await SaveAsync("Message provider. ");
             return new UpdateResult<Message>(message, saveResult);
         }
 
@@ -114,5 +114,16 @@ namespace MessengerData.Providers
             return result;
         }
 
+        public async Task<SaveResult> DeleteMessage(DateTime messageDate, Guid messageGuid, Guid userGuid)
+        {
+            var message = await _context.Messages.FirstOrDefaultAsync(x => x.Date == messageDate && x.Guid == messageGuid && x.UserGuid == userGuid);
+            if (message == null)
+            {
+                return new SaveResult("Message not found");
+            }
+
+            _context.Remove(message);
+            return await SaveAsync("Message provider. ");
+        }
     }
 }

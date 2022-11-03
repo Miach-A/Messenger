@@ -46,5 +46,22 @@ namespace Messenger.Hubs
                 await Clients.Groups(messageDTO.ChatGuid.ToString() ?? "").SendAsync("EditMessage", _messageProvider.ToMessageDTO(result.Entity));
             }
         }
+
+        public async Task DeleteMessage(UpdateMessageDTO updateMessageDTO)
+        {
+            if (Context.UserIdentifier == null
+               || updateMessageDTO.Guid == Guid.Empty
+               || updateMessageDTO.Date == new DateTime(1,1,1))
+            {
+                return;
+            }
+
+            var result = await _messageProvider.DeleteMessage(updateMessageDTO.Date, updateMessageDTO.Guid, new Guid(Context.UserIdentifier));
+
+            if (result)
+            {
+                await Clients.Groups(updateMessageDTO.ChatGuid.ToString() ?? "").SendAsync("DeleteMessage", updateMessageDTO);
+            }
+        }
     }
 }
