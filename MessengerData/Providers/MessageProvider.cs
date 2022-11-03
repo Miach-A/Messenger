@@ -11,13 +11,18 @@ namespace MessengerData.Providers
     {
         public MessageProvider(ApplicationDbContext context) : base(context) { }
 
-        public async Task<UpdateResult<Message>> CreateMessageAsync(CreateMessageDTO createMessageDTO, Guid userGuid) //ClaimsPrincipal user
-        {          
-            //if (!GetUserGuid(user, out var userGuid))
-            //{
-            //    return new UpdateResult<Message>("User not found");
-            //}
+        public async Task<UpdateResult<Message>> CreateMessageAsync(CreateMessageDTO createMessageDTO, ClaimsPrincipal user)
+        {
+            if (!GetUserGuid(user, out var userGuid))
+            {
+                return new UpdateResult<Message>("User not found");
+            }
 
+            return await CreateMessageAsync(createMessageDTO, userGuid);
+        }
+
+        public async Task<UpdateResult<Message>> CreateMessageAsync(CreateMessageDTO createMessageDTO, Guid userGuid)
+        {          
             Message message = new Message();
             message.UserGuid = userGuid;
             message.Date = DateTime.Now;
@@ -43,13 +48,18 @@ namespace MessengerData.Providers
             return new UpdateResult<Message>(message, saveResult);
         }
 
-        public async Task<UpdateResult<Message>> UpdateMessageAsync(UpdateMessageDTO updateMessageDTO, Guid userGuid) //ClaimsPrincipal user
+        public async Task<UpdateResult<Message>> UpdateMessageAsync(UpdateMessageDTO updateMessageDTO, ClaimsPrincipal user)
         {
-            //if (!GetUserGuid(user, out var userGuid))
-            //{
-            //    return new UpdateResult<Message>("User not found");
-            //}
+            if (!GetUserGuid(user, out var userGuid))
+            {
+                return new UpdateResult<Message>("User not found");
+            }
 
+            return await UpdateMessageAsync(updateMessageDTO, userGuid);
+        }
+
+        public async Task<UpdateResult<Message>> UpdateMessageAsync(UpdateMessageDTO updateMessageDTO, Guid userGuid)
+        {
             var message = _context.Messages
                 .FirstOrDefault(x => x.Date == updateMessageDTO.Date 
                                     && x.Guid == updateMessageDTO.Guid 

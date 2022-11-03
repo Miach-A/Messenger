@@ -45,7 +45,6 @@ namespace Messenger.Hubs
             {
                 await Clients.Groups(messageDTO.ChatGuid.ToString() ?? "").SendAsync("EditMessage", _messageProvider.ToMessageDTO(result.Entity));
             }
-
         }
     }
 }
