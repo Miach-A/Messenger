@@ -36,7 +36,9 @@ namespace Messenger.Hubs
             var result = await _userProvider.AddChat(new Guid(Context.UserIdentifier), createChatDTO.ContactName);
             if (result)
             {
-                await Clients.User(receiver.Guid.ToString()).SendAsync("ReceiveChat", _userProvider.ToChatDTO(result.Entity));
+                var chatDTO = _userProvider.ToChatDTO(result.Entity);
+                await Clients.Caller.SendAsync("ReceiveChat", chatDTO);
+                await Clients.User(receiver.Guid.ToString()).SendAsync("ReceiveChat", chatDTO);
             }
         }
 
@@ -65,7 +67,6 @@ namespace Messenger.Hubs
             }
 
             var result = await _messageProvider.UpdateMessageAsync(messageDTO, new Guid(Context.UserIdentifier));
-
             if (result)
             {
                 await Clients.Groups(messageDTO.ChatGuid.ToString() ?? "").SendAsync("EditMessage", _messageProvider.ToMessageDTO(result.Entity));
@@ -82,7 +83,6 @@ namespace Messenger.Hubs
             }
 
             var result = await _messageProvider.DeleteMessage(updateMessageDTO.Date, updateMessageDTO.Guid, new Guid(Context.UserIdentifier));
-
             if (result)
             {
                 await Clients.Groups(updateMessageDTO.ChatGuid.ToString() ?? "").SendAsync("DeleteMessage", updateMessageDTO);
