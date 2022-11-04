@@ -86,6 +86,8 @@ builder.Services.AddCors(option => {
          );
 });
 
+builder.Services.AddSignalR(config => {});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

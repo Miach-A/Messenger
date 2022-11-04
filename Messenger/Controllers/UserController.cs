@@ -200,7 +200,7 @@ namespace Messenger.Controllers
 
         [Authorize]
         [HttpPost("~/api/PostChat/")]
-        public async Task<IActionResult> PostChat([FromBody] CreateContactDTO createContactDTO)
+        public async Task<IActionResult> PostChat([FromBody] CreateChatDTO createChatDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -212,7 +212,7 @@ namespace Messenger.Controllers
                 return StatusCode(500);
             }
 
-            var result = await _provider.AddChat(userGuid, createContactDTO.Name);
+            var result = await _provider.AddChat(userGuid, createChatDTO.ContactName);
             if (result)
             {
                 return StatusCode(201, _provider.ToChatDTO(result.Entity));
