@@ -34,15 +34,10 @@ namespace Messenger.Hubs
                 return;
             }
 
-            var user = await  _context.Users.Include(x => x.UserChats).FirstOrDefaultAsync(x => x.Guid == new Guid(Context.UserIdentifier));
-            if (user == null)
+            var groups = await _context.UserChats.Where(x => x.UserGuid == new Guid(Context.UserIdentifier)).Select(x => x.ChatGuid).ToArrayAsync();
+            foreach (var groupGuid in groups)
             {
-                return;
-            }
-
-            foreach (var userChat in user.UserChats)
-            {
-                await Groups.AddToGroupAsync(Context.ConnectionId, userChat.ChatGuid.ToString());
+                await Groups.AddToGroupAsync(Context.ConnectionId, groupGuid.ToString());
             }
         }
 

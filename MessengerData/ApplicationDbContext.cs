@@ -18,6 +18,7 @@ namespace MessengerData
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<Chat> Chats { get; set; } = null!;
+        public DbSet<UserChats> UserChats { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(_configuration.GetConnectionString("SqlConnectionString")).LogTo(Console.WriteLine, LogLevel.Information); ;
