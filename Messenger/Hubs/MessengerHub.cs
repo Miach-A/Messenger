@@ -98,7 +98,6 @@ namespace Messenger.Hubs
             } 
 
             var result = await _messageProvider.CreateMessageAsync(messageDTO, new Guid(Context.UserIdentifier));
-           
             if (result)
             {
                 await Clients.Groups(messageDTO.ChatGuid.ToString() ?? "").SendAsync("ReceiveMessage", _messageProvider.ToMessageDTO(result.Entity));
