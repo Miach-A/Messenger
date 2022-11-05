@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MessengerModel.MessageModels;
+using System.Threading;
 
 namespace Messenger.Controllers
 {
@@ -19,24 +20,22 @@ namespace Messenger.Controllers
             _context = context;
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetMessage(DateTime date,Guid guid)
-        //{
-        //    var message = await _context.Messages.Include(x => x.CommentedMessage).FirstOrDefaultAsync(x => x.Date == date && x.Guid == guid);
-        //    if (message == null)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    return Ok(_provider.ToMessageDTO(message));             
-
-        //}
-
         [HttpGet]
-        public async Task<IActionResult> Get(DateTime date, Guid chatGuid, int count)
+        public async Task<IActionResult> Get(Guid chatGuid, int count = 20, DateTime? date = null)
         {
-            var message = await _context.Messages.Where(x => x.Date < date && x.ChatGuid == chatGuid).OrderByDescending(x => x.Date).Take(count).ToArrayAsync();
-            return Ok(_provider.ToMessageDTO(message));
+            var message = await _context.Messages
+                .Include(x => x.CommentedMessage)
+                    #pragma warning disable CS8602
+                    .ThenInclude(x => x.CommentedMessage)
+                    #pragma warning restore CS8602
+                    .ThenInclude(x => x.User)
+                .Include(x => x.User)
+                .Where(x => (date == null ? true : x.Date < date) && (x.ChatGuid == chatGuid))
+                .OrderByDescending(x => x.Date)
+                .Take(count)
+                .ToArrayAsync();
 
+            return Ok(_provider.ToMessageDTO(message));
         }
 
         [HttpPost]
