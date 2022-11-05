@@ -11,7 +11,7 @@ namespace Messenger.Hubs
     {
         private readonly MessageProvider _messageProvider;
         private readonly UserProvider _userProvider;
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;    
 
         public MessengerHub(MessageProvider messengerProvider, ApplicationDbContext context, UserProvider userProvider)
         {
@@ -24,7 +24,19 @@ namespace Messenger.Hubs
         {
             await base.OnConnectedAsync();
             await UserRegistration();
-            //await GetMessages(groups);
+        }
+
+        public async override Task OnDisconnectedAsync(Exception? exception)
+        {
+
+            if (Context.UserIdentifier == null)
+            {
+                await base.OnDisconnectedAsync(exception);
+                return;
+            }
+
+            await UserUnRegistration();
+            await base.OnDisconnectedAsync(exception);
         }
 
         private async Task UserRegistration()
@@ -37,7 +49,21 @@ namespace Messenger.Hubs
             var groups = await _context.UserChats.Where(x => x.UserGuid == new Guid(Context.UserIdentifier)).Select(x => x.ChatGuid).ToArrayAsync();
             foreach (var groupGuid in groups)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, groupGuid.ToString());
+                await Groups.AddToGroupAsync(Context.ConnectionId, groupGuid.ToString());     
+            }
+        }
+
+        private async Task UserUnRegistration()
+        {
+            if (Context.UserIdentifier == null)
+            {
+                return;
+            }
+
+            var groups = await _context.UserChats.Where(x => x.UserGuid == new Guid(Context.UserIdentifier)).Select(x => x.ChatGuid).ToArrayAsync();
+            foreach (var groupGuid in groups)
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupGuid.ToString());
             }
         }
 
