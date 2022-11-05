@@ -20,6 +20,32 @@ namespace Messenger.Hubs
             _userProvider = userProvider;
         }
 
+        public override async Task OnConnectedAsync()
+        {
+            await base.OnConnectedAsync();
+            await UserRegistration();
+            //await GetMessages(groups);
+        }
+
+        private async Task UserRegistration()
+        {
+            if (Context.UserIdentifier == null)
+            {
+                return;
+            }
+
+            var user = await  _context.Users.Include(x => x.UserChats).FirstOrDefaultAsync(x => x.Guid == new Guid(Context.UserIdentifier));
+            if (user == null)
+            {
+                return;
+            }
+
+            foreach (var userChat in user.UserChats)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, userChat.ChatGuid.ToString());
+            }
+        }
+
         public async Task AddChat(CreateChatDTO createChatDTO)
         {
             if (Context.UserIdentifier == null)
