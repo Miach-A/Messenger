@@ -80,7 +80,7 @@ namespace MessengerData.Providers
             message.Text = createMessageDTO.Text;
         }
 
-        public MessageDTO UpdateMessageDTO(Message message, MessageDTO messageDTO)
+        public MessageDTO UpdateMessageDTO(Message message, MessageDTO messageDTO, string contactName = "")
         {
             messageDTO.Text = message.Text;
             messageDTO.Date = message.Date;
@@ -89,7 +89,12 @@ namespace MessengerData.Providers
             if (message.User != null)
             {
                 messageDTO.ContactName = message.User.Name;
-            }     
+            }
+            else
+            {
+                messageDTO.ContactName = contactName;
+            }
+            
             if (message.CommentedMessage != null)
             {
                 messageDTO.CommentedMessage = ToMessageDTO(message.CommentedMessage.CommentedMessage);
@@ -98,9 +103,9 @@ namespace MessengerData.Providers
             return messageDTO;
         }
 
-        public MessageDTO ToMessageDTO(Message message)
+        public MessageDTO ToMessageDTO(Message message, string contactName = "")
         {
-            return UpdateMessageDTO(message, new MessageDTO());
+            return UpdateMessageDTO(message, new MessageDTO(), contactName);
         }
 
         public IEnumerable<MessageDTO> ToMessageDTO(IEnumerable<Message> messages)

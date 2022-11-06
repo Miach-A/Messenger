@@ -4,6 +4,7 @@ using MessengerData;
 using MessengerModel.MessageModels;
 using MessengerModel.UserModels;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Messenger.Hubs
 {
@@ -92,15 +93,18 @@ namespace Messenger.Hubs
         public async Task SendMessage(CreateMessageDTO messageDTO)
         {
             if (Context.UserIdentifier == null
-                || messageDTO.ChatGuid == Guid.Empty)
+                || messageDTO.ChatGuid == Guid.Empty
+                || Context.User == null)
             {
                 return;
-            } 
+            }
+
+            _userProvider.GetClaimValue(Context.User, ClaimTypes.Name,out var contactName);
 
             var result = await _messageProvider.CreateMessageAsync(messageDTO, new Guid(Context.UserIdentifier));
             if (result)
             {
-                await Clients.Groups(messageDTO.ChatGuid.ToString() ?? "").SendAsync("ReceiveMessage", _messageProvider.ToMessageDTO(result.Entity));
+                await Clients.Groups(messageDTO.ChatGuid.ToString() ?? "").SendAsync("ReceiveMessage", _messageProvider.ToMessageDTO(result.Entity, contactName));
             }
         }
 
