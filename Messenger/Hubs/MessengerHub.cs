@@ -132,7 +132,7 @@ namespace Messenger.Hubs
                 return;
             }
 
-            var result = await _messageProvider.DeleteMessage(updateMessageDTO.Date, updateMessageDTO.Guid, new Guid(Context.UserIdentifier));
+            var result = await _messageProvider.DeleteMessage(updateMessageDTO, new Guid(Context.UserIdentifier));
             if (result)
             {
                 await Clients.Groups(updateMessageDTO.ChatGuid.ToString() ?? "").SendAsync("DeleteMessage", updateMessageDTO);
