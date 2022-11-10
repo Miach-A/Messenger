@@ -43,9 +43,8 @@ namespace MessengerData
 
             modelBuilder.Entity<MessageComment>(x =>
             {
-                x.HasKey(x => new { x.MessageDate, x.MessageGuid}); //, x.CommentedMessageDate, x.CommentedMessageGuid  //MessageDate //MessageGuid
-                x.HasOne(x => x.CommentedMessage).WithMany().HasForeignKey(x => new { x.CommentedMessageDate, x.CommentedMessageGuid }).OnDelete(DeleteBehavior.ClientCascade); // if del mess dell all comment?
-                //x.HasOne(x => x.CommentedMessage).WithMany(x => x.MessageComment).HasForeignKey(x => new { x.CommentedMessageDate, x.CommentedMessageGuid }).OnDelete(DeleteBehavior.ClientCascade);
+                x.HasKey(x => new { x.MessageDate, x.MessageGuid});
+                x.HasOne(x => x.CommentedMessage).WithMany().HasForeignKey(x => new { x.CommentedMessageDate, x.CommentedMessageGuid }).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<DeletedMessage>(x =>

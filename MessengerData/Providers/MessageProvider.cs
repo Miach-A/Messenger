@@ -121,28 +121,20 @@ namespace MessengerData.Providers
 
         public async Task<SaveResult> DeleteMessageAsync(UpdateMessageDTO updateMessageDTO, Guid userGuid)
         {
-            var message = await _context.Messages.FirstOrDefaultAsync(x => x.Date == updateMessageDTO.Date && x.Guid == updateMessageDTO.Guid && x.UserGuid == userGuid);
+            var message = await _context.Messages
+                .Include(x => x.CommentedMessage)
+                .FirstOrDefaultAsync(x => x.Date == updateMessageDTO.Date && x.Guid == updateMessageDTO.Guid && x.UserGuid == userGuid);
             if (message == null)
             {
                 return new SaveResult("Message not found");
             }
 
             _context.Remove(message);
+            if (message.CommentedMessage != null)
+            {
+                _context.Remove(message.CommentedMessage);
+            }
             return await SaveAsync("Message provider. ");
         }
-        //public async Task<SaveResult> DeleteMessage(UpdateMessageDTO updateMessageDTO, Guid userGuid)
-        //{
-        //    var message = await _context.Messages.FirstOrDefaultAsync(x => x.Date == updateMessageDTO.Date && x.Guid == updateMessageDTO.Guid && x.UserGuid == userGuid);
-        //    if (message == null)
-        //    {
-        //        return new SaveResult("Message not found");
-        //    }
-
-        //    _context.Remove(message);
-        //    return await SaveAsync("Message provider. ");
-        //}
-
-
-        //public async Task<SaveResult> 
     }
 }
