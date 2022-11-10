@@ -138,5 +138,22 @@ namespace Messenger.Hubs
                 await Clients.Groups(updateMessageDTO.ChatGuid.ToString() ?? "").SendAsync("DeleteMessage", updateMessageDTO);
             }
         }
+
+        public async Task DeleteMessageForMe(UpdateMessageDTO messageDTO)
+        {
+            if (Context.UserIdentifier == null
+               || messageDTO.Guid == Guid.Empty
+               || messageDTO.Date == new DateTime(1, 1, 1))
+            {
+                return;
+            }
+
+            var result = await _messageProvider.DeleteMessageForMeAsync(messageDTO, new Guid(Context.UserIdentifier));
+            if (result)
+            {
+                await Clients.Groups(messageDTO.ChatGuid.ToString() ?? "").SendAsync("DeleteMessageForMe", messageDTO);
+            }
+        }
+        
     }
 }

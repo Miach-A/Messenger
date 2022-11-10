@@ -136,5 +136,25 @@ namespace MessengerData.Providers
             }
             return await SaveAsync("Message provider. ");
         }
+
+        public async Task<SaveResult> DeleteMessageForMeAsync(UpdateMessageDTO messageDTO, Guid userGuid)
+        { 
+            var message = await _context.Messages
+                .FirstOrDefaultAsync(x => x.Date == messageDTO.Date && x.Guid == messageDTO.Guid && x.UserGuid == userGuid);
+            if (message == null)
+            {
+                return new SaveResult("Message not found");
+            }
+
+            var deletedMessage = new DeletedMessage();
+            deletedMessage.Date = messageDTO.Date;
+            deletedMessage.MessageGuid  = messageDTO.Guid; 
+            deletedMessage.UserGuid = userGuid;
+            deletedMessage.ChatGuid = messageDTO.ChatGuid;
+            message.DeletedMessages.Add(deletedMessage);
+            return await SaveAsync("Message provider. ");
+        }
+
+
     }
 }

@@ -13,5 +13,6 @@ namespace MessengerModel.MessageModels
         public Guid UserGuid { get; set; }
         public string Text { get; set; } = string.Empty;
         public MessageComment? CommentedMessage { get; set; }  
+        public ICollection<DeletedMessage> DeletedMessages { get; set; } = new List<DeletedMessage>();
     }
 }

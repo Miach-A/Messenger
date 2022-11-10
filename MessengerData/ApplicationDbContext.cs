@@ -50,7 +50,7 @@ namespace MessengerData
             modelBuilder.Entity<DeletedMessage>(x =>
             {
                 x.HasKey(x => new { x.Date, x.MessageGuid, x.ChatGuid, x.UserGuid });
-                x.HasOne(x => x.Message).WithMany().HasForeignKey(x => new { x.Date, x.MessageGuid }).OnDelete(DeleteBehavior.Cascade);
+                x.HasOne(x => x.Message).WithMany(x => x.DeletedMessages).HasForeignKey(x => new { x.Date, x.MessageGuid }).OnDelete(DeleteBehavior.Cascade);
                 x.HasOne(x => x.Chat).WithMany(x => x.DeletedMessages).HasForeignKey(x => x.ChatGuid).OnDelete(DeleteBehavior.ClientCascade);
                 x.HasOne(x => x.User).WithMany(x => x.DeletedMessages).HasForeignKey(x => x.UserGuid).OnDelete(DeleteBehavior.ClientCascade);
             });
