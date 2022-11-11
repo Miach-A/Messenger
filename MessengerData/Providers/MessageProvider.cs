@@ -152,9 +152,6 @@ namespace MessengerData.Providers
                 .FirstOrDefaultAsync(x => x.Date == messageDTO.Date && x.Guid == messageDTO.Guid);
             if (message == null)
             {
-                Console.WriteLine("----NOT FOUNT----");
-                Console.WriteLine(messageDTO.Date);
-                Console.WriteLine(messageDTO.Guid);
                 return new SaveResult("Message not found");
             }
 
