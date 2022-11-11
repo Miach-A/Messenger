@@ -149,9 +149,12 @@ namespace MessengerData.Providers
         public async Task<SaveResult> DeleteMessageForMeAsync(UpdateMessageDTO messageDTO, Guid userGuid)
         { 
             var message = await _context.Messages
-                .FirstOrDefaultAsync(x => x.Date == messageDTO.Date && x.Guid == messageDTO.Guid && x.UserGuid == userGuid);
+                .FirstOrDefaultAsync(x => x.Date == messageDTO.Date && x.Guid == messageDTO.Guid);
             if (message == null)
             {
+                Console.WriteLine("----NOT FOUNT----");
+                Console.WriteLine(messageDTO.Date);
+                Console.WriteLine(messageDTO.Guid);
                 return new SaveResult("Message not found");
             }
 
