@@ -74,6 +74,15 @@ namespace MessengerData.Providers
             return new UpdateResult<Message>(message, saveResult);
         }
 
+        public IQueryable<Message> GetDeletedMessages(Guid chatGuid, Guid userGuid, DateTime? date = null)
+        {
+            return _context.DeletedMessages
+                //.Include(x => x.Message)
+                .Where(x => (date == null ? true : x.Date < date) 
+                    && x.ChatGuid == chatGuid 
+                    && x.UserGuid == userGuid)
+                .Select(x => x.Message);
+        }
         public void UpdateMessageProperties(Message message, CreateMessageDTO createMessageDTO)
         {
             message.ChatGuid = createMessageDTO.ChatGuid;

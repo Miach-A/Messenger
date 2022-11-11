@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MessengerModel.MessageModels;
 using System.Threading;
+using System.Linq;
 
 namespace Messenger.Controllers
 {
@@ -23,14 +24,25 @@ namespace Messenger.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(Guid chatGuid, int count = 20, DateTime? date = null)
         {
+            if (!_provider.GetUserGuid(User, out var userGuid))
+            {
+                return BadRequest();
+            }
+
+            //_provider.GetDeletedMessages(chatGuid, userGuid, date).Contains(x)
+            //&& x.Contains(_provider.GetDeletedMessages(chatGuid, userGuid, date))
+
             var message = await _context.Messages
+                //.Include(x => x.DeletedMessages)
                 .Include(x => x.CommentedMessage)
                     #pragma warning disable CS8602
                     .ThenInclude(x => x.CommentedMessage)
                     #pragma warning restore CS8602
                     .ThenInclude(x => x.User)
                 .Include(x => x.User)
-                .Where(x => (date == null ? true : x.Date < date) && (x.ChatGuid == chatGuid))
+                .Where(x => (date == null ? true : x.Date < date) 
+                            && (x.ChatGuid == chatGuid))
+                .Except(_provider.GetDeletedMessages(chatGuid, userGuid, date))
                 .OrderByDescending(x => x.Date)
                 .Take(count)
                 .ToArrayAsync();
