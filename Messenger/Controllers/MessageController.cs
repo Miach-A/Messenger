@@ -42,7 +42,7 @@ namespace Messenger.Controllers
                 .Include(x => x.User)
                 .Where(x => (date == null ? true : x.Date < date) 
                             && (x.ChatGuid == chatGuid))
-                .Except(_provider.GetDeletedMessages(chatGuid, userGuid, date))
+                .Where(x => !_provider.GetDeletedMessages(chatGuid, userGuid, date).Contains(x))
                 .OrderByDescending(x => x.Date)
                 .Take(count)
                 .ToArrayAsync();
