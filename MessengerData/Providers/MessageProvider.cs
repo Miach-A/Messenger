@@ -76,7 +76,7 @@ namespace MessengerData.Providers
 
         public IQueryable<Message> GetDeletedMessages(Guid chatGuid, Guid userGuid, DateTime? date = null)
         {
-            return _context.DeletedMessages
+            return _context.DeletedMessage
                 //.Include(x => x.Message)
                 .Where(x => (date == null ? true : x.Date < date) 
                     && x.ChatGuid == chatGuid 
