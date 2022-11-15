@@ -99,17 +99,39 @@ namespace Messenger.Hubs
             }
 
             var newChatUsers = await _context.UserChats
-                .Where(x => x.ChatGuid == chatGuid)
+                .Where(x => x.ChatGuid == chatGuid)  
                 .Select(x => x)
                 .ToArrayAsync();
+
+            var newChat = await _context.Chats
+                .Include(x => x.ChatUsers)
+                    .ThenInclude(x => x.User)
+                .FirstOrDefaultAsync(x => x.Guid == chatGuid);
+
+            if (newChat == null)
+            {
+                return;
+            }
+
+            var newChatDTO = _userProvider.ToChatDTO(newChat);
 
             var tasks = new List<Task>();
             foreach (var item in newChatUsers)
             {
-                tasks.Add(Clients.User(item.UserGuid.ToString()).SendAsync("ReceiveNewChat", chatGuid));
+                tasks.Add(Clients.User(item.UserGuid.ToString()).SendAsync("ReceiveNewChat", newChatDTO));
             }
 
             await Task.WhenAll();
+        }
+
+        public async Task RegistrationInNewChat(Guid chatGuid)
+        {
+            if (Context.UserIdentifier == null)
+            {
+                return;
+            }
+            
+            await Groups.AddToGroupAsync(Context.ConnectionId, chatGuid.ToString());
         }
 
         public async Task SendMessage(CreateMessageDTO messageDTO)
