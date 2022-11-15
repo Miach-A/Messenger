@@ -5,6 +5,7 @@ using MessengerModel.MessageModels;
 using MessengerModel.UserModels;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using MessengerModel.ChatModelds;
 
 namespace Messenger.Hubs
 {
@@ -88,6 +89,27 @@ namespace Messenger.Hubs
                 await Clients.Caller.SendAsync("ReceiveChat", chatDTO);
                 await Clients.User(receiver.Guid.ToString()).SendAsync("ReceiveChat", chatDTO);
             }
+        }
+
+        public async Task NewChat(Guid chatGuid)
+        {
+            if (Context.UserIdentifier == null)
+            {
+                return;
+            }
+
+            var newChatUsers = await _context.UserChats
+                .Where(x => x.ChatGuid == chatGuid)
+                .Select(x => x)
+                .ToArrayAsync();
+
+            var tasks = new List<Task>();
+            foreach (var item in newChatUsers)
+            {
+                tasks.Add(Clients.User(item.UserGuid.ToString()).SendAsync("ReceiveNewChat", chatGuid));
+            }
+
+            await Task.WhenAll();
         }
 
         public async Task SendMessage(CreateMessageDTO messageDTO)
