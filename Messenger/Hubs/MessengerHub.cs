@@ -69,28 +69,6 @@ namespace Messenger.Hubs
             }
         }
 
-        public async Task AddChat(CreateChatDTO createChatDTO)
-        {
-            if (Context.UserIdentifier == null)
-            {
-                return;
-            }
-
-            var receiver = await _context.Users.FirstOrDefaultAsync(x => x.Name == createChatDTO.ContactName);
-            if (receiver == null)
-            {
-                return;
-            }
-
-            var result = await _userProvider.AddChat(new Guid(Context.UserIdentifier), createChatDTO.ContactName);
-            if (result)
-            {
-                var chatDTO = _userProvider.ToChatDTO(result.Entity);
-                await Clients.Caller.SendAsync("ReceiveChat", chatDTO);
-                await Clients.User(receiver.Guid.ToString()).SendAsync("ReceiveChat", chatDTO);
-            }
-        }
-
         public async Task NewChat(Guid chatGuid)
         {
             if (Context.UserIdentifier == null)
@@ -100,7 +78,6 @@ namespace Messenger.Hubs
 
             var newChatUsers = await _context.UserChats
                 .Where(x => x.ChatGuid == chatGuid)  
-                .Select(x => x)
                 .ToArrayAsync();
 
             var newChat = await _context.Chats
