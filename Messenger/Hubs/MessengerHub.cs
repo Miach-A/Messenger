@@ -5,6 +5,7 @@ using MessengerModel.MessageModels;
 using MessengerModel.UserModels;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using MessengerModel.ChatModelds;
 
 namespace Messenger.Hubs
 {
@@ -88,6 +89,49 @@ namespace Messenger.Hubs
                 await Clients.Caller.SendAsync("ReceiveChat", chatDTO);
                 await Clients.User(receiver.Guid.ToString()).SendAsync("ReceiveChat", chatDTO);
             }
+        }
+
+        public async Task NewChat(Guid chatGuid)
+        {
+            if (Context.UserIdentifier == null)
+            {
+                return;
+            }
+
+            var newChatUsers = await _context.UserChats
+                .Where(x => x.ChatGuid == chatGuid)  
+                .Select(x => x)
+                .ToArrayAsync();
+
+            var newChat = await _context.Chats
+                .Include(x => x.ChatUsers)
+                    .ThenInclude(x => x.User)
+                .FirstOrDefaultAsync(x => x.Guid == chatGuid);
+
+            if (newChat == null)
+            {
+                return;
+            }
+
+            var newChatDTO = _userProvider.ToChatDTO(newChat);
+
+            var tasks = new List<Task>();
+            foreach (var item in newChatUsers)
+            {
+                tasks.Add(Clients.User(item.UserGuid.ToString()).SendAsync("ReceiveNewChat", newChatDTO));
+            }
+
+            await Task.WhenAll();
+        }
+
+        public async Task RegistrationInNewChat(Guid chatGuid)
+        {
+            if (Context.UserIdentifier == null)
+            {
+                return;
+            }
+            
+            await Groups.AddToGroupAsync(Context.ConnectionId, chatGuid.ToString());
         }
 
         public async Task SendMessage(CreateMessageDTO messageDTO)
