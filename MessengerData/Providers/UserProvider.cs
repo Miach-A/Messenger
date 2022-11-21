@@ -4,6 +4,7 @@ using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Linq;
 
 namespace MessengerData.Providers
 {
@@ -139,7 +140,7 @@ namespace MessengerData.Providers
             return contactDTO;
         }
     
-        public async Task<SaveResult> AddContact(Guid userGuid, string contactName)
+        public async Task<UpdateResult<ContactDTO>> AddContact(Guid userGuid, string contactName)
         {
             var user = await _context.Users
                 .Include(x => x.Contacts).ThenInclude(x => x.Contact)
@@ -150,12 +151,12 @@ namespace MessengerData.Providers
                 || contact == null
                 || user.Contacts.Where(x => x.ContactGuid == contact.Guid).Count() > 0)
             {
-                return new SaveResult("User provider. Add contact. User not found or contact is exist.");
+                return new UpdateResult<ContactDTO>("User provider. Add contact. User not found or contact is exist.");
             }
 
             user.Contacts.Add(new UserContacts() { User = user, Contact = contact, ContactName = contactName });
     
-            return await SaveAsync("User provider. ");
+            return new UpdateResult<ContactDTO> (ToContactDTO(contact), await SaveAsync("User provider. "));
         }    
 
         public async Task<SaveResult> DeleteContact(Guid userGuid, string contactName)
@@ -179,23 +180,27 @@ namespace MessengerData.Providers
             return await SaveAsync("User provider. ");
         }
     
-        public async Task<UpdateResult<Chat>> AddChat(Guid userGuid, string contactName)
+        public async Task<UpdateResult<Chat>> AddChat(Guid userGuid, CreateChatDTO createChatDTO)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Guid == userGuid);
-            var contact = await _context.Users.FirstOrDefaultAsync(x => x.Name == contactName);
-            if (user == null || contact == null)
+            var contacts = await _context.Users.Where(x => createChatDTO.ContactName.Contains(x.Name)).ToArrayAsync();
+            if (user == null)
             {
-                return new UpdateResult<Chat>("User provider. Add chat. User or contact name not found");
+                return new UpdateResult<Chat>("User provider. Add chat. User  not found");
             }
             
             Chat chat = new Chat();
-            chat.Name = string.Concat(user.Name,"-",contact.Name);
+            chat.Name = createChatDTO.Name;
+            chat.Public = createChatDTO.Public;
             chat.ChatUsers.Add(new UserChats { Chat = chat, User = user });
-            chat.ChatUsers.Add(new UserChats { Chat = chat, User = contact });
+            foreach (var contact in contacts)
+            {
+                chat.ChatUsers.Add(new UserChats { Chat = chat, User = contact });
+            }
             
             _context.Chats.Add(chat);
 
-            return  new UpdateResult<Chat>(chat, await SaveAsync("User provider. "));
+            return new UpdateResult<Chat>(chat, await SaveAsync("User provider. "));
         }
     }
 }

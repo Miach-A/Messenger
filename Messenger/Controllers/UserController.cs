@@ -7,6 +7,7 @@ using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Authorization;
 using MessengerData;
 using System.Xml.Linq;
+using System.IO.Compression;
 
 namespace Messenger.Controllers
 {
@@ -59,16 +60,18 @@ namespace Messenger.Controllers
         [Authorize]
         [HttpGet("~/api/GetUsers")]
         [ActionName("GetUsers")]
-        public async Task<IActionResult> GetUsers(string? name, string? firstname, string? lastname, string? phonenumber, UserOrderBy orderby = UserOrderBy.Name, int pageindex = 0, int pagesize = 20)
+        public async Task<IActionResult> GetUsers(string name, UserOrderBy orderby = UserOrderBy.Name, int pageindex = 0, int pagesize = 20)
         {
+            var nameSearch = name.ToLower();
             Expression<Func<User, bool>> filter = (x) =>
-                name == null ? true : x.Name.Contains(name.ToLowerInvariant())
-                && firstname == null ? true : x.FirstName.Contains(firstname!)
-                && lastname == null ? true : x.LastName.Contains(lastname!)
-                && phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!);
+                x.Name.Contains(nameSearch)
+                || x.FirstName.ToLower().Contains(nameSearch)
+                || x.LastName.ToLower().Contains(nameSearch);
 
+            var TotalCount = _context.Users.Where(filter).Count();
             User[] users = await _context.Users.Where(filter).OrderBy(orderby.ToString()).Skip(pageindex * pagesize).Take(pagesize).Select(x => x).ToArrayAsync();
-            return Ok(_provider.ToContactDTO(users));
+
+            return Ok(new {Contacts = _provider.ToContactDTO(users) , TotalCount = TotalCount});
         }
 
         [HttpPost]
@@ -98,7 +101,7 @@ namespace Messenger.Controllers
 
         [Authorize]
         [HttpPost("~/api/PostContact/")]
-        public async Task<IActionResult> PostContact([FromBody] string contactName)
+        public async Task<IActionResult> PostContact([FromBody] CreateContactDTO createContactDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -110,10 +113,10 @@ namespace Messenger.Controllers
                 return StatusCode(500);
             }
 
-            var result = await _provider.AddContact(userGuid, contactName);
+            var result = await _provider.AddContact(userGuid, createContactDTO.Name);
             if (result)
             {
-                return StatusCode(200);
+                return StatusCode(201, result.Entity);
             }
             else
             {
@@ -122,8 +125,8 @@ namespace Messenger.Controllers
         }
 
         [Authorize]
-        [HttpDelete("~/api/DeleteContact/")]
-        public async Task<IActionResult> DeleteContact([FromBody] string contactName)
+        [HttpDelete("~/api/DeleteContact/{name}")]
+        public async Task<IActionResult> DeleteContact(string name)
         {
             if (!ModelState.IsValid)
             {
@@ -135,7 +138,7 @@ namespace Messenger.Controllers
                 return StatusCode(500);
             }
 
-            var result = await _provider.DeleteContact(userGuid, contactName);
+            var result = await _provider.DeleteContact(userGuid, name);
             if (result)
             {
                 return StatusCode(204);
@@ -192,7 +195,7 @@ namespace Messenger.Controllers
 
         [Authorize]
         [HttpPost("~/api/PostChat/")]
-        public async Task<IActionResult> PostChat([FromBody] string contactName)
+        public async Task<IActionResult> PostChat([FromBody] CreateChatDTO createChatDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -204,7 +207,7 @@ namespace Messenger.Controllers
                 return StatusCode(500);
             }
 
-            var result = await _provider.AddChat(userGuid, contactName);
+            var result = await _provider.AddChat(userGuid, createChatDTO);
             if (result)
             {
                 return StatusCode(201, _provider.ToChatDTO(result.Entity));

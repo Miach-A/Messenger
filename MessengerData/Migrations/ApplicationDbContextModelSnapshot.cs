@@ -37,7 +37,7 @@ namespace MessengerData.Migrations
 
                     b.HasKey("Guid");
 
-                    b.ToTable("Chats");
+                    b.ToTable("Chats", (string)null);
                 });
 
             modelBuilder.Entity("MessengerModel.DeletedMessage", b =>
@@ -60,7 +60,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("UserGuid");
 
-                    b.ToTable("DeletedMessage");
+                    b.ToTable("DeletedMessage", (string)null);
                 });
 
             modelBuilder.Entity("MessengerModel.MessageComment", b =>
@@ -81,7 +81,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("CommentedMessageDate", "CommentedMessageGuid");
 
-                    b.ToTable("MessageComment");
+                    b.ToTable("MessageComment", (string)null);
                 });
 
             modelBuilder.Entity("MessengerModel.MessageModels.Message", b =>
@@ -111,7 +111,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("UserGuid");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("MessengerModel.UserChats", b =>
@@ -126,7 +126,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("UserGuid");
 
-                    b.ToTable("UserChats");
+                    b.ToTable("UserChats", (string)null);
                 });
 
             modelBuilder.Entity("MessengerModel.UserContacts", b =>
@@ -145,7 +145,7 @@ namespace MessengerData.Migrations
 
                     b.HasIndex("ContactGuid");
 
-                    b.ToTable("UserContacts");
+                    b.ToTable("UserContacts", (string)null);
                 });
 
             modelBuilder.Entity("MessengerModel.UserModels.User", b =>
@@ -181,7 +181,7 @@ namespace MessengerData.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("MessengerModel.DeletedMessage", b =>

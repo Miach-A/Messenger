@@ -12,12 +12,17 @@ namespace MessengerData.Providers
         public MessageProvider(ApplicationDbContext context) : base(context) { }
 
         public async Task<UpdateResult<Message>> CreateMessageAsync(CreateMessageDTO createMessageDTO, ClaimsPrincipal user)
-        {          
+        {
             if (!GetUserGuid(user, out var userGuid))
             {
                 return new UpdateResult<Message>("User not found");
             }
 
+            return await CreateMessageAsync(createMessageDTO, userGuid);
+        }
+
+        public async Task<UpdateResult<Message>> CreateMessageAsync(CreateMessageDTO createMessageDTO, Guid userGuid)
+        {          
             Message message = new Message();
             message.UserGuid = userGuid;
             message.Date = DateTime.Now;
@@ -50,6 +55,11 @@ namespace MessengerData.Providers
                 return new UpdateResult<Message>("User not found");
             }
 
+            return await UpdateMessageAsync(updateMessageDTO, userGuid);
+        }
+
+        public async Task<UpdateResult<Message>> UpdateMessageAsync(UpdateMessageDTO updateMessageDTO, Guid userGuid)
+        {
             var message = _context.Messages
                 .FirstOrDefault(x => x.Date == updateMessageDTO.Date 
                                     && x.Guid == updateMessageDTO.Guid 
@@ -60,17 +70,26 @@ namespace MessengerData.Providers
             }
 
             message.Text = updateMessageDTO.Text;
-            var saveResult = await SaveAsync("Message provider.");
+            var saveResult = await SaveAsync("Message provider. ");
             return new UpdateResult<Message>(message, saveResult);
         }
 
+        public IQueryable<Message> GetDeletedMessages(Guid chatGuid, Guid userGuid, DateTime? date = null)
+        {
+            return _context.DeletedMessage
+                //.Include(x => x.Message)
+                .Where(x => (date == null ? true : x.Date < date) 
+                    && x.ChatGuid == chatGuid 
+                    && x.UserGuid == userGuid)
+                .Select(x => x.Message);
+        }
         public void UpdateMessageProperties(Message message, CreateMessageDTO createMessageDTO)
         {
             message.ChatGuid = createMessageDTO.ChatGuid;
             message.Text = createMessageDTO.Text;
         }
 
-        public MessageDTO UpdateMessageDTO(Message message, MessageDTO messageDTO)
+        public MessageDTO UpdateMessageDTO(Message message, MessageDTO messageDTO, string contactName = "")
         {
             messageDTO.Text = message.Text;
             messageDTO.Date = message.Date;
@@ -79,7 +98,12 @@ namespace MessengerData.Providers
             if (message.User != null)
             {
                 messageDTO.ContactName = message.User.Name;
-            }     
+            }
+            else
+            {
+                messageDTO.ContactName = contactName;
+            }
+            
             if (message.CommentedMessage != null)
             {
                 messageDTO.CommentedMessage = ToMessageDTO(message.CommentedMessage.CommentedMessage);
@@ -88,9 +112,9 @@ namespace MessengerData.Providers
             return messageDTO;
         }
 
-        public MessageDTO ToMessageDTO(Message message)
+        public MessageDTO ToMessageDTO(Message message, string contactName = "")
         {
-            return UpdateMessageDTO(message, new MessageDTO());
+            return UpdateMessageDTO(message, new MessageDTO(), contactName);
         }
 
         public IEnumerable<MessageDTO> ToMessageDTO(IEnumerable<Message> messages)
@@ -103,6 +127,43 @@ namespace MessengerData.Providers
 
             return result;
         }
+
+        public async Task<SaveResult> DeleteMessageAsync(UpdateMessageDTO updateMessageDTO, Guid userGuid)
+        {
+            var message = await _context.Messages
+                .Include(x => x.CommentedMessage)
+                .FirstOrDefaultAsync(x => x.Date == updateMessageDTO.Date && x.Guid == updateMessageDTO.Guid && x.UserGuid == userGuid);
+            if (message == null)
+            {
+                return new SaveResult("Message not found");
+            }
+
+            _context.Remove(message);
+            if (message.CommentedMessage != null)
+            {
+                _context.Remove(message.CommentedMessage);
+            }
+            return await SaveAsync("Message provider. ");
+        }
+
+        public async Task<SaveResult> DeleteMessageForMeAsync(UpdateMessageDTO messageDTO, Guid userGuid)
+        { 
+            var message = await _context.Messages
+                .FirstOrDefaultAsync(x => x.Date == messageDTO.Date && x.Guid == messageDTO.Guid);
+            if (message == null)
+            {
+                return new SaveResult("Message not found");
+            }
+
+            var deletedMessage = new DeletedMessage();
+            deletedMessage.Date = messageDTO.Date;
+            deletedMessage.MessageGuid  = messageDTO.Guid; 
+            deletedMessage.UserGuid = userGuid;
+            deletedMessage.ChatGuid = messageDTO.ChatGuid;
+            message.DeletedMessages.Add(deletedMessage);
+            return await SaveAsync("Message provider. ");
+        }
+
 
     }
 }

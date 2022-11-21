@@ -18,6 +18,8 @@ namespace MessengerData
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<Chat> Chats { get; set; } = null!;
+        public DbSet<UserChats> UserChats { get; set; } = null!;
+        public DbSet<DeletedMessage> DeletedMessage { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(_configuration.GetConnectionString("SqlConnectionString")).LogTo(Console.WriteLine, LogLevel.Information); ;
@@ -42,15 +44,14 @@ namespace MessengerData
 
             modelBuilder.Entity<MessageComment>(x =>
             {
-                x.HasKey(x => new { x.MessageDate, x.MessageGuid}); //, x.CommentedMessageDate, x.CommentedMessageGuid  //MessageDate //MessageGuid
-                x.HasOne(x => x.CommentedMessage).WithMany().HasForeignKey(x => new { x.CommentedMessageDate, x.CommentedMessageGuid }).OnDelete(DeleteBehavior.ClientCascade); // if del mess dell all comment?
-                //x.HasOne(x => x.CommentedMessage).WithMany(x => x.MessageComment).HasForeignKey(x => new { x.CommentedMessageDate, x.CommentedMessageGuid }).OnDelete(DeleteBehavior.ClientCascade);
+                x.HasKey(x => new { x.MessageDate, x.MessageGuid});
+                x.HasOne(x => x.CommentedMessage).WithMany().HasForeignKey(x => new { x.CommentedMessageDate, x.CommentedMessageGuid }).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<DeletedMessage>(x =>
             {
                 x.HasKey(x => new { x.Date, x.MessageGuid, x.ChatGuid, x.UserGuid });
-                x.HasOne(x => x.Message).WithMany().HasForeignKey(x => new { x.Date, x.MessageGuid }).OnDelete(DeleteBehavior.Cascade);
+                x.HasOne(x => x.Message).WithMany(x => x.DeletedMessages).HasForeignKey(x => new { x.Date, x.MessageGuid }).OnDelete(DeleteBehavior.Cascade);
                 x.HasOne(x => x.Chat).WithMany(x => x.DeletedMessages).HasForeignKey(x => x.ChatGuid).OnDelete(DeleteBehavior.ClientCascade);
                 x.HasOne(x => x.User).WithMany(x => x.DeletedMessages).HasForeignKey(x => x.UserGuid).OnDelete(DeleteBehavior.ClientCascade);
             });
