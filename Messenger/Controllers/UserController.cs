@@ -7,6 +7,7 @@ using MessengerModel.UserModels;
 using Microsoft.AspNetCore.Authorization;
 using MessengerData;
 using System.Xml.Linq;
+using System.IO.Compression;
 
 namespace Messenger.Controllers
 {
@@ -59,14 +60,8 @@ namespace Messenger.Controllers
         [Authorize]
         [HttpGet("~/api/GetUsers")]
         [ActionName("GetUsers")]
-        public async Task<IActionResult> GetUsers(string name, UserOrderBy orderby = UserOrderBy.Name, int pageindex = 0, int pagesize = 20) //string? firstname, string? lastname, string? phonenumber
+        public async Task<IActionResult> GetUsers(string name, UserOrderBy orderby = UserOrderBy.Name, int pageindex = 0, int pagesize = 20)
         {
-            //Expression<Func<User, bool>> filter = (x) =>
-            //    ((name == null ? true : x.Name.Contains(name.ToLower()))
-            //    && (firstname == null ? true : x.FirstName.ToLower().Contains(firstname!.ToLower()))
-            //    && (lastname == null ? true : x.LastName.ToLower().Contains(lastname!.ToLower()))
-            //    && (phonenumber == null ? true : x.PhoneNumber.Contains(phonenumber!)));
-
             var nameSearch = name.ToLower();
             Expression<Func<User, bool>> filter = (x) =>
                 x.Name.Contains(nameSearch)
@@ -212,7 +207,7 @@ namespace Messenger.Controllers
                 return StatusCode(500);
             }
 
-            var result = await _provider.AddChat(userGuid, createChatDTO.ContactName);
+            var result = await _provider.AddChat(userGuid, createChatDTO);
             if (result)
             {
                 return StatusCode(201, _provider.ToChatDTO(result.Entity));
