@@ -218,6 +218,19 @@ namespace Messenger.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPost("~/api/PostChatUser/")]
+        public async Task<IActionResult> PostChatUser([FromBody] AddChatUserDTO addChatUserDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _provider.AddChatUser(addChatUserDTO);
+
+            return Ok();
+        }
+
         public enum UserOrderBy
         {
             Name,

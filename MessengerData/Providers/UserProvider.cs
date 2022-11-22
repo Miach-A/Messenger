@@ -202,5 +202,16 @@ namespace MessengerData.Providers
 
             return new UpdateResult<Chat>(chat, await SaveAsync("User provider. "));
         }
+
+        public async Task<bool> AddChatUser(AddChatUserDTO addChatUserDTO)
+        {
+            var contacGuids = await _context.Users.Where(x => addChatUserDTO.ContactName.Contains(x.Name)).Select(x => x.Guid).ToArrayAsync();
+            foreach (var contacGuid in contacGuids)
+            {
+                _context.UserChats.Add(new UserChats { ChatGuid = addChatUserDTO.guid, UserGuid = contacGuid });
+            }
+
+            return await SaveAsync("User provider.");
+        }
     }
 }
