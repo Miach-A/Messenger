@@ -228,7 +228,7 @@ namespace Messenger.Controllers
             }
             var result = await _provider.AddChatUser(addChatUserDTO);
 
-            return Ok();
+            return Ok(result);
         }
 
         public enum UserOrderBy
