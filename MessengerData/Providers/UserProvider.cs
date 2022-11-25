@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace MessengerData.Providers
 {
@@ -205,7 +206,8 @@ namespace MessengerData.Providers
 
         public async Task<bool> AddChatUser(AddChatUserDTO addChatUserDTO)
         {
-            var contacGuids = await _context.Users.Where(x => addChatUserDTO.ContactName.Contains(x.Name)).Select(x => x.Guid).ToArrayAsync();
+            IQueryable<Guid> chatUsersGuid = _context.UserChats.Where(x => x.ChatGuid == addChatUserDTO.guid).Select(x => x.UserGuid);
+            var contacGuids = await _context.Users.Where(x => addChatUserDTO.ContactName.Contains(x.Name)).Select(x => x.Guid).Except(chatUsersGuid).ToArrayAsync();
             foreach (var contacGuid in contacGuids)
             {
                 _context.UserChats.Add(new UserChats { ChatGuid = addChatUserDTO.guid, UserGuid = contacGuid });
