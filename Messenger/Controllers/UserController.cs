@@ -237,8 +237,8 @@ namespace Messenger.Controllers
         }
 
         [Authorize]
-        [HttpPost("~/api/LeavePublicChat/:guid")]
-        public async Task<IActionResult> LeavePublicChat(Guid guid)
+        [HttpPost("~/api/LeavePublicChat/")]
+        public async Task<IActionResult> LeavePublicChat([FromBody] LeaveChatDTO leaveChatDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -250,7 +250,7 @@ namespace Messenger.Controllers
                 return StatusCode(500);
             }
 
-            var result = await _provider.LeavePublicChat(userGuid, guid);
+            var result = await _provider.LeavePublicChat(userGuid, leaveChatDTO.guid);
             if (!result)
             {
                 return StatusCode(500, result.ErrorMessage);
