@@ -204,7 +204,7 @@ namespace MessengerData.Providers
             return new UpdateResult<Chat>(chat, await SaveAsync("User provider. "));
         }
 
-        public async Task<bool> AddChatUser(AddChatUserDTO addChatUserDTO)
+        public async Task<SaveResult> AddChatUser(AddChatUserDTO addChatUserDTO)
         {
             IQueryable<Guid> chatUsersGuid = _context.UserChats.Where(x => x.ChatGuid == addChatUserDTO.guid).Select(x => x.UserGuid);
             var contacGuids = await _context.Users.Where(x => addChatUserDTO.ContactName.Contains(x.Name)).Select(x => x.Guid).Except(chatUsersGuid).ToArrayAsync();
@@ -214,6 +214,12 @@ namespace MessengerData.Providers
             }
 
             return await SaveAsync("User provider.");
+        }
+
+        public async Task<SaveResult> LeavePublicChat(Guid userGuid, Guid chatGuid)
+        {
+            _context.UserChats.Remove(new UserChats() { ChatGuid = chatGuid, UserGuid = userGuid });
+            return await SaveAsync("User provider."); 
         }
     }
 }

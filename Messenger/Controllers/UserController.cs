@@ -226,9 +226,37 @@ namespace Messenger.Controllers
             {
                 return BadRequest();
             }
-            var result = await _provider.AddChatUser(addChatUserDTO);
 
-            return Ok(result);
+            var result = await _provider.AddChatUser(addChatUserDTO);
+            if (!result)
+            {
+                return StatusCode(500, result.ErrorMessage);
+            }
+
+            return Ok((bool)result);
+        }
+
+        [Authorize]
+        [HttpPost("~/api/LeavePublicChat/:guid")]
+        public async Task<IActionResult> LeavePublicChat(Guid guid)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            if (!_provider.GetUserGuid(User, out var userGuid))
+            {
+                return StatusCode(500);
+            }
+
+            var result = await _provider.LeavePublicChat(userGuid, guid);
+            if (!result)
+            {
+                return StatusCode(500, result.ErrorMessage);
+            }
+
+            return Ok((bool)result);
         }
 
         public enum UserOrderBy
