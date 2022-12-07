@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Messenger.Hubs;
+using Messenger.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,7 +47,7 @@ builder.Services.AddSwaggerGen(option =>
 builder.Services.AddAuthentication("OAuth")
     .AddJwtBearer("OAuth", config =>
     {
-        byte[] secretBytes = Encoding.UTF8.GetBytes(builder.Configuration["AuthJwtKey"]);
+        byte[] secretBytes = Encoding.UTF8.GetBytes(builder.Configuration["AuthJwtKey"]!);
 
         var key = new SymmetricSecurityKey(secretBytes);
 
@@ -106,11 +107,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 //app.MapControllers();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapDefaultControllerRoute();
-    endpoints.MapHub<MessengerHub>("/messenger");
 
-});
+//app.UseEndpoints(endpoints =>
+//{
+//    //endpoints.MapDefaultControllerRoute();
+//    //endpoints.MapHub<MessengerHub>("/messenger");
 
+//});
+
+app.MapDefaultControllerRoute();
+app.MapHub<MessengerHub>("/messenger");
+
+app.MigrateDatabase();
 app.Run();
