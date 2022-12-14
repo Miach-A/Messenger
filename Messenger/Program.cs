@@ -11,7 +11,6 @@ using Messenger.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>();
-//builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<UserProvider>();
 builder.Services.AddScoped<MessageProvider>();
 builder.Services.AddScoped<AuthenticateProvider>();
@@ -89,6 +88,8 @@ builder.Services.AddCors(option => {
 });
 
 builder.Services.AddSignalR(config => {});
+
+builder.Logging.AddAzureWebAppDiagnostics();
 
 var app = builder.Build();
 
