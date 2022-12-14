@@ -89,6 +89,7 @@ builder.Services.AddCors(option => {
 
 builder.Services.AddSignalR(config => {});
 
+builder.Logging.AddConsole();
 builder.Logging.AddAzureWebAppDiagnostics();
 
 var app = builder.Build();
